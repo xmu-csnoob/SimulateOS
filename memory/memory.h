@@ -4,25 +4,27 @@
 #include <stdio.h>
 #include <string.h>
 
+typedef unsigned char BYTE;
 
-unsigned char memory[MEMORY_SIZE];
+BYTE memory[MEMORY_SIZE];
 
 #define MEMORY_START_ADDRESS 0
 #define MEMORY_END_ADDRESS MEMORY_SIZE - 1
+
 void init_memory(){
     for(int i = 0; i < MEMORY_SIZE; i++){
         memory[i] = 0x00;
     }
 }
 
-unsigned char* access_memory(int pos){
+BYTE* access_memory(int pos){
     if(pos >= 0 && pos < MEMORY_SIZE){
          return &memory[pos]; 
     }
     return NULL;
 }
 
-void assign_memory(int pos, unsigned char* data, size_t size){
+void assign_memory(int pos, BYTE* data, size_t size){
     if(pos >= 0 && pos < MEMORY_SIZE){
         if(pos + size <= MEMORY_SIZE){
             memcpy(&memory[pos], data, size);

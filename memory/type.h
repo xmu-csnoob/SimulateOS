@@ -39,7 +39,7 @@ void assign_pointer(pointer p, void* data, size_t data_size) {
         if (p.t == INTEGER) {
             if (p.address + data_size * INTEGER_BYTES <= MEMORY_SIZE) {
                 for (size_t i = 0; i < data_size; i++) {
-                    unsigned char int_data[INTEGER_BYTES];
+                    BYTE int_data[INTEGER_BYTES];
                     int value = ((int*)data)[i];
                     int_data[0] = (value >> 24) & 0xFF;
                     int_data[1] = (value >> 16) & 0xFF;
@@ -52,7 +52,7 @@ void assign_pointer(pointer p, void* data, size_t data_size) {
             }
         } else if (p.t == CHAR) {
             if (p.address + data_size * CHAR_BYTES <= MEMORY_SIZE) {
-                assign_memory(p.address, (unsigned char*)data, data_size * CHAR_BYTES);
+                assign_memory(p.address, (BYTE*)data, data_size * CHAR_BYTES);
             } else {
                 printf("Warning: address out of bounds for CHAR assignment\n");
             }
@@ -71,18 +71,18 @@ pointer get_pointer(size_t address, type t, void* data, size_t data_size) {
     return p;  // Ensure pointer is returned
 }
 
-unsigned char* solve_pointer(pointer p) {
-    unsigned char *data = NULL;
+BYTE* solve_pointer(pointer p) {
+    BYTE *data = NULL;
     if (p.address >= 0 && p.address < MEMORY_SIZE) {
         if (p.t == INTEGER) {
-            data = (unsigned char*)malloc(p.size * INTEGER_BYTES);
-            unsigned char *mem_data = access_memory(p.address);
+            data = (BYTE*)malloc(p.size * INTEGER_BYTES);
+            BYTE *mem_data = access_memory(p.address);
             if (mem_data != NULL) {
                 memcpy(data, mem_data, p.size * INTEGER_BYTES);
             }
         } else if (p.t == CHAR) {
-            data = (unsigned char*)malloc(p.size * CHAR_BYTES);
-            unsigned char *mem_data = access_memory(p.address);
+            data = (BYTE*)malloc(p.size * CHAR_BYTES);
+            BYTE *mem_data = access_memory(p.address);
             if (mem_data != NULL) {
                 memcpy(data, mem_data, p.size * CHAR_BYTES);
             }
@@ -91,7 +91,7 @@ unsigned char* solve_pointer(pointer p) {
     return data;
 }
 
-unsigned int readInteger(unsigned char* data) {
+unsigned int readInteger(BYTE* data) {
     if (data == NULL) {
         printf("Warning: data is NULL\n");
         return 0;
@@ -100,7 +100,7 @@ unsigned int readInteger(unsigned char* data) {
     return combined;
 }
 
-unsigned char readChar(unsigned char* data) {
+BYTE readChar(BYTE* data) {
     if (data == NULL) {
         printf("Warning: data is NULL\n");
         return 0;
