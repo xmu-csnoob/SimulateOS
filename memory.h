@@ -7,6 +7,8 @@
 
 unsigned char memory[MEMORY_SIZE];
 
+#define MEMORY_START_ADDRESS 0
+#define MEMORY_END_ADDRESS MEMORY_SIZE - 1
 void init_memory(){
     for(int i = 0; i < MEMORY_SIZE; i++){
         memory[i] = 0x00;

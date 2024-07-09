@@ -17,38 +17,42 @@ typedef enum {
 typedef struct {
     size_t address;
     type t;
+    size_t size;
 } pointer;
 
-pointer create_pointer(size_t address, type t) {
+pointer create_pointer(size_t address, type t, size_t size) {
     pointer p;
     if (address >= 0 && address < MEMORY_SIZE) {
         p.address = address;
         p.t = t;
+        p.size = size;
     } else {
         p.address = 0;
         p.t = NULLTYPE;
+        p.size = 0;
     }
     return p;
 }
 
-void assign_pointer(pointer p, void* data) {
+void assign_pointer(pointer p, void* data, size_t data_size) {
     if (p.address >= 0 && p.address < MEMORY_SIZE) {
         if (p.t == INTEGER) {
-            if (p.address + INTEGER_BYTES <= MEMORY_SIZE) {
-                unsigned char int_data[INTEGER_BYTES];
-                int value = *((int*)data);
-                int_data[0] = (value >> 24) & 0xFF;
-                int_data[1] = (value >> 16) & 0xFF;
-                int_data[2] = (value >> 8) & 0xFF;
-                int_data[3] = value & 0xFF;
-                assign_memory(p.address, int_data, INTEGER_BYTES);
+            if (p.address + data_size * INTEGER_BYTES <= MEMORY_SIZE) {
+                for (size_t i = 0; i < data_size; i++) {
+                    unsigned char int_data[INTEGER_BYTES];
+                    int value = ((int*)data)[i];
+                    int_data[0] = (value >> 24) & 0xFF;
+                    int_data[1] = (value >> 16) & 0xFF;
+                    int_data[2] = (value >> 8) & 0xFF;
+                    int_data[3] = value & 0xFF;
+                    assign_memory(p.address + i * INTEGER_BYTES, int_data, INTEGER_BYTES);
+                }
             } else {
                 printf("Warning: address out of bounds for INTEGER assignment\n");
             }
         } else if (p.t == CHAR) {
-            if (p.address + CHAR_BYTES <= MEMORY_SIZE) {
-                unsigned char char_data = *((unsigned char*)data);
-                assign_memory(p.address, &char_data, CHAR_BYTES);
+            if (p.address + data_size * CHAR_BYTES <= MEMORY_SIZE) {
+                assign_memory(p.address, (unsigned char*)data, data_size * CHAR_BYTES);
             } else {
                 printf("Warning: address out of bounds for CHAR assignment\n");
             }
@@ -58,22 +62,29 @@ void assign_pointer(pointer p, void* data) {
     } else {
         printf("Warning: invalid address for pointer assignment\n");
     }
+    p.size = data_size;  // Ensure size is set after assignment
+}
+
+pointer get_pointer(size_t address, type t, void* data, size_t data_size) {
+    pointer p = create_pointer(address, t, data_size);
+    assign_pointer(p, data, data_size);
+    return p;  // Ensure pointer is returned
 }
 
 unsigned char* solve_pointer(pointer p) {
     unsigned char *data = NULL;
     if (p.address >= 0 && p.address < MEMORY_SIZE) {
         if (p.t == INTEGER) {
-            data = (unsigned char*)malloc(INTEGER_BYTES);
+            data = (unsigned char*)malloc(p.size * INTEGER_BYTES);
             unsigned char *mem_data = access_memory(p.address);
             if (mem_data != NULL) {
-                memcpy(data, mem_data, INTEGER_BYTES);
+                memcpy(data, mem_data, p.size * INTEGER_BYTES);
             }
         } else if (p.t == CHAR) {
-            data = (unsigned char*)malloc(CHAR_BYTES);
+            data = (unsigned char*)malloc(p.size * CHAR_BYTES);
             unsigned char *mem_data = access_memory(p.address);
             if (mem_data != NULL) {
-                data[0] = mem_data[0];
+                memcpy(data, mem_data, p.size * CHAR_BYTES);
             }
         }
     }
