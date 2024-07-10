@@ -28,14 +28,20 @@ void test_cpu(){
     CPU cpu;
     init_cpu(&cpu);
     
-    instruction program[5];
+    instruction program[6];
     program[0] = (instruction){LOAD, 0, 5, 0};   // R0 = 5
-    program[1] = (instruction){LOAD, 1, 10, 0};  // R1 = 10
-    program[2] = (instruction){ADD, 2, 0, 1};    // R2 = R0 + R1
-    program[3] = (instruction){SUB, 3, 1, 0};    // R3 = R1 - R0
-    program[4] = (instruction){HALT, 0, 0, 0};   // HALT
-
+    program[1] = (instruction){LOAD, 1, 1, 0};  // R1 = 1
+    int start = 2;
+    program[2] = (instruction){ADD, 2, 2, 1};    // R2 = R2 + R1
+    program[3] = (instruction){CMP, 2, 0, 0};    // compare: R2 R0
+    program[4] = (instruction){JNE, 2, 0, 0};    // R3 = R1 - R0
+    program[5] = (instruction){JE, 6, 0, 0};    // R3 = R1 - R0
+    program[6] = (instruction){HALT, 0, 0, 0};   // HALT
+    int count = 0;
     while(cpu.state == CPU_RUNNING){
+        count++;
+        if(count > 10)
+            break;
         cpu.ir = cpu.pc;
         execute_instruction(&cpu, &program[cpu.ir]);
         print_cpu_state(&cpu);
