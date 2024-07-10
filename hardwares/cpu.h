@@ -55,21 +55,25 @@ void init_cpu(CPU* cpu){
 }
 
 void execute_instruction(CPU* cpu, instruction* instruction){
-    printf("\noperation code: %d\n", instruction->opcode);
+    
     switch (instruction->opcode)
     {
         case NOP:
             break;
-        case LOAD:  
+        case LOAD:
+            printf("\n LOAD\n");
             cpu->registers[instruction->operand1] = instruction->operand2;
             break;
         case ADD:
+            printf("\n ADD \n");
             cpu->registers[instruction->operand1] = cpu->registers[instruction->operand2] + cpu->registers[instruction->operand3];
             break;
         case SUB:   
+            printf("\n SUB \n");
             cpu->registers[instruction->operand1] = cpu->registers[instruction->operand2] - cpu->registers[instruction->operand3];
             break;
         case CMP:
+            printf("\n CMP \n");
             if(instruction->operand1 == instruction->operand2){
                 cpu->zf = 1;
             }else if(instruction->operand1 < instruction->operand2){
@@ -77,19 +81,23 @@ void execute_instruction(CPU* cpu, instruction* instruction){
             }
             break;
         case JE:
+            printf("\n JE \n");
             if(cpu->zf == 1){
                 cpu->pc = instruction->operand1;
             }
             break;
         case JNE:
+            printf("\n JNE \n");
             if(cpu->zf != 1){
                 cpu->pc = instruction->operand1;
             }
             break;
         case JUMP:
+            printf("\n JUMP \n");
             cpu->pc = instruction->operand1;
             break;
         case HALT:
+            printf("\n HALT \n");
             cpu->state = CPU_HALTED;
         default:
             break;
