@@ -1,18 +1,19 @@
 #include <stdio.h>
-#include "memory/type.h"
-#include "memory/memory.h"
-#include "memory/mmu.h"
-#include "memory/allocate.h"
+#include "type.h"
+#include "memory.h"
+#include "mmu.h"
+#include "allocate.h"
+#include "virtual.h"
 #include "process.h"
+#include "cpu.h"
 void print_memory_content(int start, int end);
 void test_virtual_memory();
 void test_process();
-
+void test_cpu();
 int main() {
-    init_memory();
-    init_blocks();
     // test_virtual_memory();
-    test_process();
+    // test_process();
+    test_cpu();
     return 0;
 }
 
@@ -23,7 +24,28 @@ void print_memory_content(int start, int end) {
     printf("\n");
 }
 
+void test_cpu(){
+    CPU cpu;
+    init_cpu(&cpu);
+    
+    instruction program[5];
+    program[0] = (instruction){LOAD, 0, 5, 0};   // R0 = 5
+    program[1] = (instruction){LOAD, 1, 10, 0};  // R1 = 10
+    program[2] = (instruction){ADD, 2, 0, 1};    // R2 = R0 + R1
+    program[3] = (instruction){SUB, 3, 1, 0};    // R3 = R1 - R0
+    program[4] = (instruction){HALT, 0, 0, 0};   // HALT
+
+    while(cpu.state == CPU_RUNNING){
+        cpu.ir = cpu.pc;
+        execute_instruction(&cpu, &program[cpu.ir]);
+        print_cpu_state(&cpu);
+    }
+}
+
 void test_process(){
+    init_memory();
+    init_blocks();
+    init_pages();
     create_process(80);
     print_block(0);
     print_block(1);
@@ -34,6 +56,9 @@ void test_process(){
 }
 
 void test_virtual_memory(){
+    init_memory();
+    init_blocks();
+    init_pages();
     allocate_page(0, 0);
     allocate_page(1, 1);
     printf("Initial memory state:\n");
