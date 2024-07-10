@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "memory/type.h"
 #include "memory/memory.h"
-
+#include "memory/mmu.h"
 void print_memory_content(int start, int end) {
     for (int i = start; i < end; i++) {
         printf("memory[%d] = 0x%02X\n", i, memory[i]);
@@ -23,6 +23,8 @@ int main() {
 
     printf("\nMemory state after assignments:\n");
     print_memory_content(0, 16);
+
+    allocate_page(0, 0);
 
     BYTE* retrieved_int_data = solve_pointer(int_ptr);
     for (int i = 0; i < 2; i++) {

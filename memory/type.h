@@ -3,8 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "memory.h"
-
+#include "mmu.h"
 #define INTEGER_BYTES 4
 #define CHAR_BYTES 1
 

@@ -1,6 +1,7 @@
 #ifndef ALLOCATE_H
 #define ALLOCATE_H
-int allocate_memory_first_fit(){
+#include <stdio.h>
+size_t allocate_memory_first_fit(size_t bytes){
     
 }
 #endif

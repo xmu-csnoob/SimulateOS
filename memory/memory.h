@@ -12,19 +12,19 @@ BYTE memory[MEMORY_SIZE];
 #define MEMORY_END_ADDRESS MEMORY_SIZE - 1
 
 void init_memory(){
-    for(int i = 0; i < MEMORY_SIZE; i++){
+    for(size_t i = 0; i < MEMORY_SIZE; i++){
         memory[i] = 0x00;
     }
 }
 
-BYTE* access_memory(int pos){
+BYTE* access_physical_memory(size_t pos){
     if(pos >= 0 && pos < MEMORY_SIZE){
          return &memory[pos]; 
     }
     return NULL;
 }
 
-void assign_memory(int pos, BYTE* data, size_t size){
+void assign_physical_memory(size_t pos, BYTE* data, size_t size){
     if(pos >= 0 && pos < MEMORY_SIZE){
         if(pos + size <= MEMORY_SIZE){
             memcpy(&memory[pos], data, size);
@@ -38,7 +38,7 @@ void assign_memory(int pos, BYTE* data, size_t size){
 }
 
 void printMemory(){
-    for(int i = 0; i < MEMORY_SIZE; i++){
+    for(size_t i = 0; i < MEMORY_SIZE; i++){
         printf("%d", memory[i]);
     }
 }
