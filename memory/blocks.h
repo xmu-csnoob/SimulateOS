@@ -11,4 +11,12 @@ void init_blocks(){
         block_table[i] = i * BLOCK_SIZE;
     }
 }
+
+void print_block(size_t block){
+    size_t start = block_table[block];
+    for(int i = start; i < start + BLOCK_SIZE; i++){
+        printf("%X", memory[i]);
+    }
+    printf("\n");
+}
 #endif

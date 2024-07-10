@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mmu.h"
+#include "virtual.h"
 #define INTEGER_BYTES 4
 #define CHAR_BYTES 1
 
@@ -34,9 +35,9 @@ pointer create_pointer(size_t address, type t, size_t size) {
 }
 
 void assign_pointer(pointer p, void* data, size_t data_size) {
-    if (p.address >= 0 && p.address < MEMORY_SIZE) {
+    if (p.address >= 0 && p.address < V_MEMORY_SIZE) {
         if (p.t == INTEGER) {
-            if (p.address + data_size * INTEGER_BYTES <= MEMORY_SIZE) {
+            if (p.address + data_size * INTEGER_BYTES <= V_MEMORY_SIZE) {
                 for (size_t i = 0; i < data_size; i++) {
                     BYTE int_data[INTEGER_BYTES];
                     int value = ((int*)data)[i];
@@ -47,19 +48,19 @@ void assign_pointer(pointer p, void* data, size_t data_size) {
                     assign_memory(p.address + i * INTEGER_BYTES, int_data, INTEGER_BYTES);
                 }
             } else {
-                printf("Warning: address out of bounds for INTEGER assignment\n");
+                printf("\nWarning: address out of bounds for INTEGER assignment\n");
             }
         } else if (p.t == CHAR) {
-            if (p.address + data_size * CHAR_BYTES <= MEMORY_SIZE) {
+            if (p.address + data_size * CHAR_BYTES <= V_MEMORY_SIZE) {
                 assign_memory(p.address, (BYTE*)data, data_size * CHAR_BYTES);
             } else {
-                printf("Warning: address out of bounds for CHAR assignment\n");
+                printf("\nWarning: address out of bounds for CHAR assignment\n");
             }
         } else {
-            printf("Warning: invalid type for pointer assignment\n");
+            printf("\nWarning: invalid type for pointer assignment\n");
         }
     } else {
-        printf("Warning: invalid address for pointer assignment\n");
+        printf("\nWarning: invalid address for pointer assignment\n");
     }
     p.size = data_size;  // Ensure size is set after assignment
 }
@@ -72,7 +73,7 @@ pointer get_pointer(size_t address, type t, void* data, size_t data_size) {
 
 BYTE* solve_pointer(pointer p) {
     BYTE *data = NULL;
-    if (p.address >= 0 && p.address < MEMORY_SIZE) {
+    if (p.address >= 0 && p.address < V_MEMORY_SIZE) {
         if (p.t == INTEGER) {
             data = (BYTE*)malloc(p.size * INTEGER_BYTES);
             BYTE *mem_data = access_memory(p.address);
@@ -92,7 +93,7 @@ BYTE* solve_pointer(pointer p) {
 
 unsigned int readInteger(BYTE* data) {
     if (data == NULL) {
-        printf("Warning: data is NULL\n");
+        printf("\nWarning: data is NULL\n");
         return 0;
     }
     unsigned int combined = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
@@ -101,7 +102,7 @@ unsigned int readInteger(BYTE* data) {
 
 BYTE readChar(BYTE* data) {
     if (data == NULL) {
-        printf("Warning: data is NULL\n");
+        printf("\nWarning: data is NULL\n");
         return 0;
     }
     return *data;

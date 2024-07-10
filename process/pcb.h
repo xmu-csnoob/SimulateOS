@@ -1,8 +1,8 @@
 #ifndef PCB_H
 #define PCB_H
 #include <stdio.h>
-#include "page.h"
-#define MAX_PROCESS
+#include "allocate.h"
+#define MAX_PROCESS 16
 typedef enum{
     RUNNING,
     READY,
@@ -13,9 +13,11 @@ typedef enum{
 typedef struct{
     size_t pid;
     process_state state;
-    size_t page_table[PAGE_NUMS];
+    size_t* page_table;
+    size_t page_num;
 } PCB;
 
 PCB pcb_table[MAX_PROCESS];
 size_t current_pid = 0;
+
 #endif

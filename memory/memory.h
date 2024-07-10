@@ -3,7 +3,6 @@
 #define MEMORY_SIZE 1024
 #include <stdio.h>
 #include <string.h>
-
 typedef unsigned char BYTE;
 
 BYTE memory[MEMORY_SIZE];
@@ -30,10 +29,10 @@ void assign_physical_memory(size_t pos, BYTE* data, size_t size){
             memcpy(&memory[pos], data, size);
         }else{
             memcpy(&memory[pos], data, MEMORY_SIZE - pos);
-            printf("Warning: Data truncated as it exceeds memory boundary. \n");
+            printf("\nWarning: Data truncated as it exceeds memory boundary. \n");
         }
     }else{
-        printf("Error: Invalid memory pos for assignment. \n");
+        printf("\nError: Invalid memory pos for assignment. \n");
     }
 }
 
