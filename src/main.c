@@ -5,25 +5,29 @@
 #include "allocate.h"
 #include "virtual.h"
 #include "process.h"
+#include "disk.h"
 #include "cpu.h"
 #include "log.h"
 
-
-void print_memory_content(int start, int end);
+// tests functions
 void test_virtual_memory();
 void test_process();
 void test_cpu();
+void test_disks();
+
+// tool functions
+void print_memory_content(int start, int end);
+void generate_disks();
+void create_disk_file(const char *filename, const char* disk_name, size_t disk_size);
 
 
 int main() {
     // test_virtual_memory();
     // test_process();
     // test_cpu();
-    _ERROR("what is this %d", 400);
-    _WARN("what is this %d", 300);
-    _DEBUG("what is this %d", 200);
-    _TRACE("what is this %d", 100);
-
+    test_disks();
+    // generate_disks();
+    
     return 0;
 }
 
@@ -101,4 +105,55 @@ void test_virtual_memory(){
         printf("Retrieved char value %d: %c\n", i, char_value);
     }
     free(retrieved_char_data);
+}
+
+void test_disks() {
+    const char* disks[MAX_DISKS] = {
+        "../src/hardwares/disks/disk0.txt",
+        "../src/hardwares/disks/disk1.txt",
+        "../src/hardwares/disks/disk2.txt",
+        "../src/hardwares/disks/disk3.txt"
+    };
+
+    for (int i = 0; i < MAX_DISKS; i++) {
+        char file_name[256];
+        size_t file_size = validate_disk(disks[i], file_name, sizeof(file_name));
+        if (file_size > 0 && file_size != (size_t)-1) {
+            _INFO("Disk %s validated with size %zu bytes.", file_name, file_size);
+        } else {
+            _ERROR("Disk %s validation failed.", disks[i]);
+        }
+    }
+}
+
+
+void generate_disks(){
+    create_disk_file("../src/hardwares/disks/disk0.txt", "Samsung 990 pro", 256);
+    create_disk_file("../src/hardwares/disks/disk1.txt", "Samsung 990 pro", 512);
+    create_disk_file("../src/hardwares/disks/disk2.txt", "Samsung 990 pro", 1024);
+    create_disk_file("../src/hardwares/disks/disk3.txt","Samsung 990 pro", 2048);
+}
+
+void create_disk_file(const char *filename, const char* disk_name, size_t disk_size) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Failed to create file");
+        return;
+    }
+
+    // 写入磁盘元数据
+    fprintf(file, "Disk Name: %s\n", disk_name);
+    fprintf(file, "Disk Size: %d bytes\n", disk_size);
+    fprintf(file, "Data:\n");
+
+    // 写入 512B 的二进制数据，每个字节用两个十六进制数字表示
+    for (int i = 0; i < disk_size; i++) {
+        fprintf(file, "00 "); // 每个字节用 "00 " 表示
+        if ((i + 1) % 16 == 0) {
+            fprintf(file, "\n"); // 每行 16 个字节
+        }
+    }
+
+    fclose(file);
+    printf("Disk file '%s' created successfully.\n", filename);
 }
