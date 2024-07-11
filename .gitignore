@@ -1,3 +1,6 @@
-main.exe
-.vscode
-.vscode/settings.json
+# 排除所有文件和目录
+/*
+
+# 例外规则：只包括 src 目录和 CMakeLists.txt 文件
+!/src/
+!/CMakeLists.txt
