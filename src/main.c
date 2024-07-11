@@ -7,15 +7,23 @@
 #include "process.h"
 #include "cpu.h"
 #include "log.h"
+
+
 void print_memory_content(int start, int end);
 void test_virtual_memory();
 void test_process();
 void test_cpu();
+
+
 int main() {
     // test_virtual_memory();
     // test_process();
     // test_cpu();
-    _ERROR("what is this %d", 200);
+    _ERROR("what is this %d", 400);
+    _WARN("what is this %d", 300);
+    _DEBUG("what is this %d", 200);
+    _TRACE("what is this %d", 100);
+
     return 0;
 }
 
