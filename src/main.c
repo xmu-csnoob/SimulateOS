@@ -109,10 +109,10 @@ void test_virtual_memory(){
 
 void test_disks() {
     const char* disks[MAX_DISKS] = {
-        "../src/hardwares/disks/disk0.txt",
-        "../src/hardwares/disks/disk1.txt",
-        "../src/hardwares/disks/disk2.txt",
-        "../src/hardwares/disks/disk3.txt"
+        "../src/hardwares/disks/disk0.disk",
+        "../src/hardwares/disks/disk1.disk",
+        "../src/hardwares/disks/disk2.disk",
+        "../src/hardwares/disks/disk3.disk"
     };
 
     for (int i = 0; i < MAX_DISKS; i++) {
@@ -128,10 +128,10 @@ void test_disks() {
 
 
 void generate_disks(){
-    create_disk_file("../src/hardwares/disks/disk0.txt", "Samsung 990 pro", 256);
-    create_disk_file("../src/hardwares/disks/disk1.txt", "Samsung 990 pro", 512);
-    create_disk_file("../src/hardwares/disks/disk2.txt", "Samsung 990 pro", 1024);
-    create_disk_file("../src/hardwares/disks/disk3.txt","Samsung 990 pro", 2048);
+    create_disk_file("../src/hardwares/disks/disk0.disk", "Samsung 990 pro", 256);
+    create_disk_file("../src/hardwares/disks/disk1.disk", "Samsung 990 pro", 512);
+    create_disk_file("../src/hardwares/disks/disk2.disk", "Samsung 990 pro", 1024);
+    create_disk_file("../src/hardwares/disks/disk3.disk","Samsung 990 pro", 2048);
 }
 
 void create_disk_file(const char *filename, const char* disk_name, size_t disk_size) {
