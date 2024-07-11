@@ -9,8 +9,8 @@
 #define CHAR_BYTES 1
 
 typedef enum {
-    INTEGER,
-    CHAR,
+    MY_INTEGER,
+    MY_CHAR,
     NULLTYPE
 } type;
 
@@ -36,7 +36,7 @@ pointer create_pointer(size_t address, type t, size_t size) {
 
 void assign_pointer(pointer p, void* data, size_t data_size) {
     if (p.address >= 0 && p.address < V_MEMORY_SIZE) {
-        if (p.t == INTEGER) {
+        if (p.t == MY_INTEGER) {
             if (p.address + data_size * INTEGER_BYTES <= V_MEMORY_SIZE) {
                 for (size_t i = 0; i < data_size; i++) {
                     BYTE int_data[INTEGER_BYTES];
@@ -50,7 +50,7 @@ void assign_pointer(pointer p, void* data, size_t data_size) {
             } else {
                 printf("\nWarning: address out of bounds for INTEGER assignment\n");
             }
-        } else if (p.t == CHAR) {
+        } else if (p.t == MY_CHAR) {
             if (p.address + data_size * CHAR_BYTES <= V_MEMORY_SIZE) {
                 assign_memory(p.address, (BYTE*)data, data_size * CHAR_BYTES);
             } else {
@@ -74,13 +74,13 @@ pointer get_pointer(size_t address, type t, void* data, size_t data_size) {
 BYTE* solve_pointer(pointer p) {
     BYTE *data = NULL;
     if (p.address >= 0 && p.address < V_MEMORY_SIZE) {
-        if (p.t == INTEGER) {
+        if (p.t == MY_INTEGER) {
             data = (BYTE*)malloc(p.size * INTEGER_BYTES);
             BYTE *mem_data = access_memory(p.address);
             if (mem_data != NULL) {
                 memcpy(data, mem_data, p.size * INTEGER_BYTES);
             }
-        } else if (p.t == CHAR) {
+        } else if (p.t == MY_CHAR) {
             data = (BYTE*)malloc(p.size * CHAR_BYTES);
             BYTE *mem_data = access_memory(p.address);
             if (mem_data != NULL) {
