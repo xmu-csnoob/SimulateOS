@@ -1,3 +1,4 @@
+// src/test.c
 #include <stdio.h>
 #include "type.h"
 #include "memory.h"
@@ -41,7 +42,7 @@ void print_memory_content(int start, int end) {
     printf("\n");
 }
 
-void test_cpu() {
+void test_cpu(){
     CPU cpu;
     init_cpu(&cpu);
     
@@ -55,14 +56,14 @@ void test_cpu() {
     program[6] = (instruction){JE, 7, 0, 0};    // If R2 == R0, jump to instruction at address 7
     program[7] = (instruction){HALT, 0, 0, 0};  // Halt
    
-    while(cpu.state == CPU_RUNNING) {
+    while(cpu.state == CPU_RUNNING){
         cpu.ir = cpu.pc;
         execute_instruction(&cpu, &program[cpu.ir]);
         print_cpu_state(&cpu);
     }
 }
 
-void test_process() {
+void test_process(){
     init_memory();
     init_blocks();
     init_pages();
@@ -70,12 +71,12 @@ void test_process() {
     print_block(0);
     print_block(1);
     print_block(2);
-    printf("%d", page_table[pcb_table[0].page_table[0]].physical_page);
-    printf("%d", page_table[pcb_table[0].page_table[1]].physical_page);
-    printf("%d", page_table[pcb_table[0].page_table[2]].physical_page);
+    printf("%d",page_table[pcb_table[0].page_table[0]].physical_page);
+    printf("%d",page_table[pcb_table[0].page_table[1]].physical_page);
+    printf("%d",page_table[pcb_table[0].page_table[2]].physical_page);
 }
 
-void test_virtual_memory() {
+void test_virtual_memory(){
     init_memory();
     init_blocks();
     init_pages();
@@ -123,11 +124,11 @@ void test_disks() {
     }
 }
 
-void generate_disks() {
+void generate_disks(){
     create_disk_file("../src/hardwares/disks/disk0.disk", "Samsung 990 pro", 256);
     create_disk_file("../src/hardwares/disks/disk1.disk", "Samsung 990 pro", 512);
     create_disk_file("../src/hardwares/disks/disk2.disk", "Samsung 990 pro", 1024);
-    create_disk_file("../src/hardwares/disks/disk3.disk", "Samsung 990 pro", 2048);
+    create_disk_file("../src/hardwares/disks/disk3.disk","Samsung 990 pro", 2048);
 }
 
 void create_disk_file(const char *filename, const char *disk_name, size_t disk_size) {

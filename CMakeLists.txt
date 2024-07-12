@@ -13,6 +13,7 @@ file(GLOB SOURCES
     "${CMAKE_SOURCE_DIR}/src/memory/*.c"
     "${CMAKE_SOURCE_DIR}/src/process/*.c"
     "${CMAKE_SOURCE_DIR}/src/disk/*.c"
+    "${CMAKE_SOURCE_DIR}/src/kernel.c"
 )
 
 # 添加可执行文件
