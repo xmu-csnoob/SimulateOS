@@ -10,6 +10,8 @@
 #include "cpu.h"
 #include "log.h"
 #include "disk_io.h"
+#include "disk_block.h"
+#include "virtual_disk.h"
 
 // tests functions
 void test_virtual_memory();
@@ -17,7 +19,8 @@ void test_process();
 void test_cpu();
 void test_disks();
 void test_disk_io();
-
+void test_disk_blocks();
+void test_v_disk();
 // tool functions
 void print_memory_content(int start, int end);
 void generate_disks();
@@ -31,7 +34,8 @@ int main() {
     // test_cpu();
     test_disks();
     test_disk_io();
-    
+    test_disk_blocks();
+    test_v_disk();
     return 0;
 }
 
@@ -179,3 +183,40 @@ void test_disk_io() {
         _INFO("%02X ", buffer_to_read[i]);
     }
 }
+
+void test_disk_blocks(){
+    init_disk_blocks();
+    printDiskBlocks();
+}
+
+void test_v_disk() {
+    // 假设在 create_virtual_disk 函数中定义了虚拟磁盘名称和初始化方法
+    virtual_disk* v_disk = create_virtual_disk("TestVirtualDisk");
+    if (v_disk == NULL) {
+        printf("Failed to create virtual disk\n");
+        return;
+    }
+
+    // 初始化物理磁盘块
+    init_disk_blocks();
+
+    // 挂载一些块（假设磁盘0和块0存在且未挂载）
+    if (!mount_disk_block(v_disk, 0, 0)) {
+        printf("Failed to mount block 0 on disk 0\n");
+    }
+    if (!mount_disk_block(v_disk, 0, 1)) {
+        printf("Failed to mount block 1 on disk 0\n");
+    }
+
+    // 打印虚拟磁盘信息
+    printf("Virtual disk %s has size %zu and block count %zu\n", v_disk->name, v_disk->size, v_disk->block_size);
+
+    for (size_t i = 0; i < v_disk->block_size; i++) {
+        disk_block db = v_disk->mounted_blocks[i];
+        printf("Block %zu: Disk ID %zu, Block ID %zu, Mounted %d\n", i, db.disk_id, db.block_id, db.mounted);
+    }
+    printDiskBlocks();
+    // 释放虚拟磁盘
+    free_virtual_disk(v_disk);
+}
+
