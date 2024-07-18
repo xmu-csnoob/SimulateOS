@@ -4,31 +4,41 @@ cmake_minimum_required(VERSION 3.10)
 project(SimulateOS)
 
 # 添加包含目录
-include_directories(${CMAKE_SOURCE_DIR}/src/common ${CMAKE_SOURCE_DIR}/src/hardwares ${CMAKE_SOURCE_DIR}/src/memory ${CMAKE_SOURCE_DIR}/src/process ${CMAKE_SOURCE_DIR}/src/disk)
+include_directories(${CMAKE_SOURCE_DIR}/src/common 
+                    ${CMAKE_SOURCE_DIR}/src/hardwares 
+                    ${CMAKE_SOURCE_DIR}/src/memory 
+                    ${CMAKE_SOURCE_DIR}/src/process
+                    ${CMAKE_SOURCE_DIR}/src/disk 
+                    ${CMAKE_SOURCE_DIR}/testing)
 
-# 查找所有共享的源文件
-file(GLOB SHARED_SOURCES
+# 查找所有源文件
+file(GLOB KERNEL_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/kernel.c"
     "${CMAKE_SOURCE_DIR}/src/hardwares/*.c"
     "${CMAKE_SOURCE_DIR}/src/memory/*.c"
     "${CMAKE_SOURCE_DIR}/src/process/*.c"
     "${CMAKE_SOURCE_DIR}/src/disk/*.c"
-)
-
-# 查找各自的源文件
-file(GLOB KERNEL_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/kernel.c"
+    "${CMAKE_SOURCE_DIR}/src/common/log.c"
 )
 
 file(GLOB TEST_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/test.c"
+    "${CMAKE_SOURCE_DIR}/testing/main.c"
+    "${CMAKE_SOURCE_DIR}/testing/test_disk/*.c"
+    "${CMAKE_SOURCE_DIR}/testing/test_hardwares/*.c"
+    "${CMAKE_SOURCE_DIR}/testing/test_memory/*.c"
+    "${CMAKE_SOURCE_DIR}/testing/test_process/*.c"
+    "${CMAKE_SOURCE_DIR}/src/hardwares/*.c"
+    "${CMAKE_SOURCE_DIR}/src/memory/*.c"
+    "${CMAKE_SOURCE_DIR}/src/process/*.c"
+    "${CMAKE_SOURCE_DIR}/src/disk/*.c"
+    "${CMAKE_SOURCE_DIR}/src/common/log.c"
 )
 
-# 创建共享库
-add_library(shared_lib ${SHARED_SOURCES})
-
-# 添加可执行文件，并链接共享库
+# 添加可执行文件
 add_executable(kernel ${KERNEL_SOURCES})
-target_link_libraries(kernel shared_lib)
-
 add_executable(test ${TEST_SOURCES})
-target_link_libraries(test shared_lib)
+
+# 为 test 可执行文件设置链接器选项
+if (WIN32)
+    target_link_options(test PRIVATE "-mconsole")
+endif()

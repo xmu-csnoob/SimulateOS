@@ -13,6 +13,7 @@
 void handle_shell_command(const char *command);
 
 int main() {
+    init_log_level();
     // 初始化各个模块
     init_memory();
     init_blocks();

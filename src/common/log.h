@@ -2,6 +2,7 @@
 #define LOG_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 // 定义日志级别
 #define LOG_LEVEL_ERROR 0
@@ -11,9 +12,24 @@
 #define LOG_LEVEL_TRACE 4
 #define LOG_LEVEL_TEST 5
 
-#ifndef LOG_LEVEL
-#define LOG_LEVEL LOG_LEVEL_TRACE
-#endif
+// 声明日志级别变量
+extern int LOG_LEVEL;
+
+// 获取环境变量中的日志级别
+static int get_log_level() {
+    const char* log_level_env = getenv("LOG_LEVEL");
+    if (log_level_env == NULL) {
+        return LOG_LEVEL_TRACE;  // 默认日志级别为 TRACE
+    }
+
+    int log_level = atoi(log_level_env);
+    return log_level;
+}
+
+// 初始化日志级别
+static void init_log_level() {
+    LOG_LEVEL = get_log_level();
+}
 
 // 根据平台设置颜色
 #ifdef _WIN32
