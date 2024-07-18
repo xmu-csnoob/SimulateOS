@@ -17,7 +17,7 @@ typedef struct{
     size_t page_num;
 } PCB;
 
-PCB pcb_table[MAX_PROCESS];
-size_t current_pid = 0;
+extern PCB pcb_table[MAX_PROCESS];
+extern size_t current_pid;
 
 #endif

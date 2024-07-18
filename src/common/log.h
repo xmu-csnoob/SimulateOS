@@ -26,10 +26,10 @@
 #define LOG_PRINT(level, color, fmt, ...) do { \
     if (level <= LOG_LEVEL) { \
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color); \
-        if (strlen(fmt) == strlen("") + 1) { \
-            printf("[%s][%s:%d] " fmt "\n", #level, __FILE__, __LINE__); \
+        if (fmt[0] == '\0') { \
+            printf("[%s][%s:%d]\n", #level, __FILE__, __LINE__); \
         } else { \
-            printf("[%s][%s:%d] " fmt "\n", #level, __FILE__, __LINE__, __VA_ARGS__); \
+            printf("[%s][%s:%d] " fmt "\n", #level, __FILE__, __LINE__, ##__VA_ARGS__); \
         } \
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE); \
     } \
