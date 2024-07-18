@@ -1,0 +1,43 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y cmake make gcc g++
+      
+    - name: Create build directory
+      run: mkdir -p build && cd build
+      
+    - name: Configure with CMake
+      run: cd build && cmake ..
+      
+    - name: Build project
+      run: cd build && make
+      
+    - name: Run tests
+      run: |
+        cd build
+        ./test.exe
+      continue-on-error: true
+      
+    - name: Analyze test results
+      if: failure()
+      run: |
+        echo "Test execution failed. Analyzing..."
+        # Replace this with your error analysis commands
+        # For example, you can parse the output log for errors or assert failures
+        grep -i "error" test.log || true
+        grep -i "assert" test.log || true
