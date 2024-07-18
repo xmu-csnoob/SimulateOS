@@ -23,23 +23,41 @@ void test_process();
 void print_memory_content(int start, int end);
 void generate_disks();
 void create_disk_file(const char *filename, const char* disk_name, size_t disk_size);
+int validate_disk_file(const char *filename);
 
 int main() {
+    // 设置日志级别为 TEST
+    #define LOG_LEVEL LOG_LEVEL_TEST
+
+    // 检查是否生成了四个 .disk 文件，并验证它们
     generate_disks();
-    
-    _INFO("Running memory tests...\n");
+    for (int i = 0; i < MAX_DISKS; i++) {
+        char filename[256];
+        snprintf(filename, sizeof(filename), "../src/hardwares/disks/disk%d.disk", i);
+        if (!validate_disk_file(filename)) {
+            _TEST("Disk file %s validation failed\n", filename);
+            return 1;
+        }
+    }
+    _TEST("All disk files validated successfully.\n");
+
+    _TEST("Running memory tests...\n");
+    // 精心设计数据，判断各步日志是否符合预期
     test_memory();
-    
-    _INFO("Running CPU tests...\n");
+
+    _TEST("Running CPU tests...\n");
+    // 精心设计指令序列，判断各步日志是否符合预期
     test_cpu();
     
-    _INFO("Running disk tests...\n");
+    _TEST("Running disk tests...\n");
+    // 判断各步日志是否符合预期
     test_disks();
     test_disk_io();
     test_disk_blocks();
     test_virtual_disk();
     
-    _INFO("Running process tests...\n");
+    _TEST("Running process tests...\n");
+    // 判断各步日志是否符合预期
     test_process();
     
     return 0;
@@ -47,31 +65,28 @@ int main() {
 
 void print_memory_content(int start, int end) {
     for (int i = start; i < end; i++) {
-        printf("memory[%d] = 0x%02X\n", i, memory[i]);
+        _TEST("memory[%d] = 0x%02X\n", i, memory[i]);
     }
-    printf("\n");
+    _TEST("\n");
 }
 
 void test_memory() {
-    _INFO("Initializing memory...\n");
+    _TEST("Initializing memory...\n");
     init_memory();
     init_blocks();
     init_pages();
-    _INFO("Memory initialization complete.\n");
+    _TEST("Memory initialization complete.\n");
 
-    // Perform memory operations
-    allocate_page(0, 0);
-    allocate_page(1, 1);
-    
+    // 精心设计数据进行测试
     BYTE data[] = {0xDE, 0xAD, 0xBE, 0xEF};
     assign_memory(0, data, sizeof(data));
     BYTE *retrieved_data = access_memory(0);
     
-    _INFO("Memory content at address 0:\n");
+    _TEST("Memory content at address 0:\n");
     for (size_t i = 0; i < sizeof(data); i++) {
-        printf("0x%02X ", retrieved_data[i]);
+        _TEST("0x%02X ", retrieved_data[i]);
     }
-    printf("\n");
+    _TEST("\n");
 }
 
 void test_cpu() {
@@ -135,7 +150,14 @@ void create_disk_file(const char *filename, const char *disk_name, size_t disk_s
     }
 
     fclose(file);
-    printf("Disk file '%s' created successfully.\n", filename);
+    _TEST("Disk file '%s' created successfully.\n", filename);
+}
+
+int validate_disk_file(const char *filename) {
+    char command[512];
+    snprintf(command, sizeof(command), "grep 'Disk Name:' %s && grep 'Disk Size:' %s", filename, filename);
+    int result = system(command);
+    return result == 0;
 }
 
 void test_disk_io() {
@@ -145,24 +167,24 @@ void test_disk_io() {
     size_t address = 0;
     unsigned char write_value = 0x41; // 'A'
     write_at(disk0, address, write_value);
-    _INFO("Wrote byte %02X at address %zu\n", write_value, address);
+    _TEST("Wrote byte %02X at address %zu\n", write_value, address);
     
     // 读取单个字节
     unsigned char read_value = read_at(disk0, address);
-    _INFO("Read byte %02X at address %zu\n", read_value, address);
+    _TEST("Read byte %02X at address %zu\n", read_value, address);
 
     // 写入多个字节
     unsigned char buffer_to_write[] = {0x42, 0x43, 0x44, 0x45}; // 'B', 'C', 'D', 'E'
     write_buffer_at(disk0, address + 1, buffer_to_write, sizeof(buffer_to_write));
-    _INFO("Wrote buffer at address %zu\n", address + 1);
+    _TEST("Wrote buffer at address %zu\n", address + 1);
     
     // 读取多个字节
     unsigned char buffer_to_read[sizeof(buffer_to_write)];
     read_buffer_at(disk0, address + 1, buffer_to_read, sizeof(buffer_to_read));
     for (size_t i = 0; i < sizeof(buffer_to_read); i++) {
-        _INFO("%02X ", buffer_to_read[i]);
+        _TEST("%02X ", buffer_to_read[i]);
     }
-    printf("\n");
+    _TEST("\n");
 }
 
 void test_disk_blocks() {
@@ -173,7 +195,7 @@ void test_disk_blocks() {
 void test_virtual_disk() {
     virtual_disk* v_disk = create_virtual_disk("TestVirtualDisk");
     if (v_disk == NULL) {
-        printf("Failed to create virtual disk\n");
+        _TEST("Failed to create virtual disk\n");
         return;
     }
 
@@ -182,23 +204,19 @@ void test_virtual_disk() {
 
     // 挂载一些块（假设磁盘0和块0存在且未挂载）
     if (!mount_disk_block(v_disk, 0, 0)) {
-        printf("Failed to mount block 0 on disk 0\n");
+        _TEST("Failed to mount block 0 on disk 0\n");
     }
     if (!mount_disk_block(v_disk, 0, 1)) {
-        printf("Failed to mount block 1 on disk 0\n");
+        _TEST("Failed to mount block 1 on disk 0\n");
     }
 
     // 打印虚拟磁盘信息
-    printf("Virtual disk %s has size %zu and block count %zu\n", v_disk->name, v_disk->size, v_disk->block_size);
+    _TEST("Virtual disk %s has size %zu and block count %zu\n", v_disk->name, v_disk->size, v_disk->block_size);
 
     for (size_t i = 0; i < v_disk->block_size; i++) {
         disk_block db = v_disk->mounted_blocks[i];
-        printf("Block %zu: Disk ID %zu, Block ID %zu, Mounted %d\n", i, db.disk_id, db.block_id, db.mounted);
+        _TEST("Block %zu: Disk ID %zu, Block ID %zu, Mounted %d\n", i, db.disk_id, db.block_id, db.mounted);
     }
-    printDiskBlocks();
-
-    // 释放虚拟磁盘
-    free_virtual_disk(v_disk);
 }
 
 void test_process() {
@@ -209,7 +227,7 @@ void test_process() {
     print_block(0);
     print_block(1);
     print_block(2);
-    printf("%zu\n", page_table[pcb_table[0].page_table[0]].physical_page);
-    printf("%zu\n", page_table[pcb_table[0].page_table[1]].physical_page);
-    printf("%zu\n", page_table[pcb_table[0].page_table[2]].physical_page);
+    _TEST("%d\n", page_table[pcb_table[0].page_table[0]].physical_page);
+    _TEST("%d\n", page_table[pcb_table[0].page_table[1]].physical_page);
+    _TEST("%d\n", page_table[pcb_table[0].page_table[2]].physical_page);
 }

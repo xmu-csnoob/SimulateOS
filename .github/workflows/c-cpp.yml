@@ -16,7 +16,7 @@ jobs:
       uses: actions/checkout@v4
       
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y cmake make gcc g++
+      run: sudo apt-get update && sudo apt-get install -y cmake make gcc g++ python3
       
     - name: Create build directory
       run: mkdir -p build && cd build
@@ -30,14 +30,10 @@ jobs:
     - name: Run tests
       run: |
         cd build
-        ./test
+        ./test.exe > test_output.log 2>&1
       continue-on-error: true
       
     - name: Analyze test results
-      if: failure()
       run: |
-        echo "Test execution failed. Analyzing..."
-        # Replace this with your error analysis commands
-        # For example, you can parse the output log for errors or assert failures
-        grep -i "error" test.log || true
-        grep -i "assert" test.log || true
+        cat build/test_output.log
+        python3 .github/workflows/analyze_test_results.py build/test_output.log

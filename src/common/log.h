@@ -9,6 +9,7 @@
 #define LOG_LEVEL_INFO 2
 #define LOG_LEVEL_DEBUG 3
 #define LOG_LEVEL_TRACE 4
+#define LOG_LEVEL_TEST 5
 
 #ifndef LOG_LEVEL
 #define LOG_LEVEL LOG_LEVEL_TRACE
@@ -61,5 +62,6 @@
 #define _INFO(fmt, ...) LOG_PRINT(LOG_LEVEL_INFO, ANSI_COLOR_GREEN, fmt, ##__VA_ARGS__)
 #define _DEBUG(fmt, ...) LOG_PRINT(LOG_LEVEL_DEBUG, ANSI_COLOR_CYAN, fmt, ##__VA_ARGS__)
 #define _TRACE(fmt, ...) LOG_PRINT(LOG_LEVEL_TRACE, ANSI_COLOR_BLUE, fmt, ##__VA_ARGS__)
+#define _TEST(fmt, ...) LOG_PRINT(LOG_LEVEL_TEST, ANSI_COLOR_MAGENTA, fmt, ##__VA_ARGS__)
 
 #endif // LOG_H
