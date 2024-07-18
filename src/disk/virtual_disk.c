@@ -45,7 +45,7 @@ int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id) {
     // Reallocate memory to accommodate the new block
     v_disk->mounted_blocks = (disk_block*)realloc(v_disk->mounted_blocks, sizeof(disk_block) * (v_disk->block_size + 1));
     if (v_disk->mounted_blocks == NULL) {
-        _ERROR("Error: memory reallocation failed\n, allocate size is %d", sizeof(disk_block) * (v_disk->block_size + 1));
+        _ERROR("Error: memory reallocation failed\n, allocate size is %d", (int)(sizeof(disk_block) * (v_disk->block_size + 1)));
         return -1;
     }
     
