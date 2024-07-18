@@ -2,16 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "type.h"
 #include "memory.h"
-#include "mmu.h"
-#include "allocate.h"
 #include "virtual.h"
 #include "process.h"
 #include "disk.h"
 #include "cpu.h"
 #include "log.h"
-#include "disk_io.h"
 
 // Shell command handler
 void handle_shell_command(const char *command);

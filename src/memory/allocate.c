@@ -1,4 +1,4 @@
-#include "allocate.h"
+#include "virtual.h"
 
 void allocate_memory_first_fit(size_t pid, size_t bytes) {
     size_t mapped_block[BLOCKS_NUM];
