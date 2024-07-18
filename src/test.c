@@ -60,6 +60,9 @@ void test_memory() {
     _INFO("Memory initialization complete.\n");
 
     // Perform memory operations
+    allocate_page(0, 0);
+    allocate_page(1, 1);
+    
     BYTE data[] = {0xDE, 0xAD, 0xBE, 0xEF};
     assign_memory(0, data, sizeof(data));
     BYTE *retrieved_data = access_memory(0);
