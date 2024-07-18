@@ -13,7 +13,7 @@ size_t allocate_page(size_t physical_page, size_t virtual_page){
         return -1;
     }
     if (page_table[virtual_page].valid == 1) {
-        printf("virtual page is %d", page_table[virtual_page].valid);
+        printf("virtual page is %zu", page_table[virtual_page].valid);
         printf("\nError: Virtual page already allocated.\n");
         return -1;
     }

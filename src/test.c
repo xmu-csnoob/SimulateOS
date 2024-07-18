@@ -206,7 +206,7 @@ void test_process() {
     print_block(0);
     print_block(1);
     print_block(2);
-    printf("%d\n", page_table[pcb_table[0].page_table[0]].physical_page);
-    printf("%d\n", page_table[pcb_table[0].page_table[1]].physical_page);
-    printf("%d\n", page_table[pcb_table[0].page_table[2]].physical_page);
+    printf("%zu\n", page_table[pcb_table[0].page_table[0]].physical_page);
+    printf("%zu\n", page_table[pcb_table[0].page_table[1]].physical_page);
+    printf("%zu\n", page_table[pcb_table[0].page_table[2]].physical_page);
 }
