@@ -28,7 +28,7 @@ extern disk_blocks* disk_blocks_table[MAX_DISKS];
 // functions for dividing physical disks
 
 void init_disk_blocks();
-void printDiskBlocks();
+void print_disk_blocks();
 
 // functions for virutal blocks
 int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id);

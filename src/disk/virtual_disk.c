@@ -22,16 +22,22 @@ void init_disk_blocks() {
     }
 }
 
-void printDiskBlocks() {
+void print_disk_blocks() {
+    int mounted_size = 0;
     for (int i = 0; i < MAX_DISKS; i++) {
         disk_blocks *dbs = disk_blocks_table[i];
         size_t blocks = dbs->block_count;
-        printf("Disk id: %d, has %zu blocks in total.\n", i, blocks);
+        _TRACE("Disk id: %d, has %zu blocks in total.\n", i, blocks);
         for (size_t j = 0; j < blocks; j++) {
             disk_block db = dbs->blocks[j];
-            printf("Block id %zu, %s\n", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
+            _TRACE("Block id %zu, %s\n", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
+            if(db.mounted == 1){
+                mounted_size++;
+                _TEST("Block id %zu is mounted to virtual disk %zu", j, i);
+            }
         }
     }
+    _TEST("%d disk_blocks has been mounted");
 }
 
 int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id) {

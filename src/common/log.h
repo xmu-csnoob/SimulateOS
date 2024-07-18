@@ -10,7 +10,7 @@
 #define LOG_LEVEL_INFO 2
 #define LOG_LEVEL_DEBUG 3
 #define LOG_LEVEL_TRACE 4
-#define LOG_LEVEL_TEST 5
+#define LOG_LEVEL_TEST -1
 
 // 声明日志级别变量
 extern int LOG_LEVEL;
