@@ -30,7 +30,7 @@ void print_disk_blocks() {
         _TRACE("Disk id: %d, has %zu blocks in total.\n", i, blocks);
         for (int j = 0; j < blocks; j++) {
             disk_block db = dbs->blocks[j];
-            _TRACE("Block id %zu, %s\n", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
+            _TRACE("Block id %d, %s\n", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
             if(db.mounted == 1){
                 mounted_size++;
                 _TEST("Block id %d is mounted to virtual disk %d", j, i);
