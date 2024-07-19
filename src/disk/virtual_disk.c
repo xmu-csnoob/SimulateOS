@@ -2,6 +2,10 @@
 
 disk_blocks* disk_blocks_table[MAX_DISKS];
 
+virtual_disk* virtual_disks[MAX_VIRTUAL_DISKS];
+
+int virtual_disk_count = 0;
+
 void init_disk_blocks() {
     for (int i = 0; i < MAX_DISKS; i++) {
         disk d = physical_disks[i];
@@ -72,6 +76,7 @@ virtual_disk* create_virtual_disk(const char* name) {
     v_disk->block_size = 0;
     v_disk->size = 0;
     v_disk->mounted_blocks = NULL;
+    virtual_disks[virtual_disk_count++] = v_disk;
     return v_disk;
 }
 
@@ -82,4 +87,70 @@ void free_virtual_disk(virtual_disk* v_disk) {
         free(v_disk->mounted_blocks);
         free(v_disk);
     }
+}
+
+unsigned char read_virtual_disk_at(int virtual_disk_id, size_t address) {
+    virtual_disk* disk = virtual_disks[virtual_disk_id];
+    int block_id = address / DISK_BLOCK_SIZE;
+    int block_offset = address % DISK_BLOCK_SIZE;
+    disk_block* db = &disk->mounted_blocks[block_id];
+    size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
+    unsigned char data = read_at(physical_disks[db->disk_id].file, disk_offset);
+    return data;
+}
+
+int write_virtual_disk_at(int virtual_disk_id, size_t address, unsigned char byte) {
+    virtual_disk* disk = virtual_disks[virtual_disk_id];
+    int block_id = address / DISK_BLOCK_SIZE;
+    int block_offset = address % DISK_BLOCK_SIZE;
+    disk_block* db = &disk->mounted_blocks[block_id];
+    size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
+    _DEBUG("disk_offset is %zu", disk_offset);
+    write_at(physical_disks[db->disk_id].file, disk_offset, byte);
+    return 0;
+}
+
+unsigned char* read_bytes_virtual_disk_at(int virtual_disk_id, size_t address, size_t length) {
+    virtual_disk* disk = virtual_disks[virtual_disk_id];
+    unsigned char* buffer = (unsigned char*)malloc(length);
+
+    size_t bytes_read = 0;
+    while (bytes_read < length) {
+        int block_id = (address + bytes_read) / DISK_BLOCK_SIZE;
+        int block_offset = (address + bytes_read) % DISK_BLOCK_SIZE;
+        disk_block* db = &disk->mounted_blocks[block_id];
+        size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
+        
+        size_t bytes_to_read = DISK_BLOCK_SIZE - block_offset;
+        if (bytes_to_read > length - bytes_read) {
+            bytes_to_read = length - bytes_read;
+        }
+
+        read_buffer_at(physical_disks[db->disk_id].file, disk_offset, buffer + bytes_read, bytes_to_read);
+        bytes_read += bytes_to_read;
+    }
+    
+    return buffer;
+}
+
+int write_bytes_virtual_disk_at(int virtual_disk_id, size_t address, const unsigned char* bytes, size_t length) {
+    virtual_disk* disk = virtual_disks[virtual_disk_id];
+
+    size_t bytes_written = 0;
+    while (bytes_written < length) {
+        int block_id = (address + bytes_written) / DISK_BLOCK_SIZE;
+        int block_offset = (address + bytes_written) % DISK_BLOCK_SIZE;
+        disk_block* db = &disk->mounted_blocks[block_id];
+        size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
+        
+        size_t bytes_to_write = DISK_BLOCK_SIZE - block_offset;
+        if (bytes_to_write > length - bytes_written) {
+            bytes_to_write = length - bytes_written;
+        }
+
+        write_buffer_at(physical_disks[db->disk_id].file, disk_offset, bytes + bytes_written, bytes_to_write);
+        bytes_written += bytes_to_write;
+    }
+
+    return 0;
 }

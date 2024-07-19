@@ -9,10 +9,12 @@ include_directories(${CMAKE_SOURCE_DIR}/src/common
                     ${CMAKE_SOURCE_DIR}/src/memory 
                     ${CMAKE_SOURCE_DIR}/src/process
                     ${CMAKE_SOURCE_DIR}/src/disk 
+                    ${CMAKE_SOURCE_DIR}/src/fs 
                     ${CMAKE_SOURCE_DIR}/testing/test_disk
                     ${CMAKE_SOURCE_DIR}/testing/test_hardwares
                     ${CMAKE_SOURCE_DIR}/testing/test_memory
-                    ${CMAKE_SOURCE_DIR}/testing/test_process)
+                    ${CMAKE_SOURCE_DIR}/testing/test_process
+                    ${CMAKE_SOURCE_DIR}/testing/test_filesystem)
 
 # 查找所有源文件
 file(GLOB KERNEL_SOURCES
@@ -21,6 +23,7 @@ file(GLOB KERNEL_SOURCES
     "${CMAKE_SOURCE_DIR}/src/memory/*.c"
     "${CMAKE_SOURCE_DIR}/src/process/*.c"
     "${CMAKE_SOURCE_DIR}/src/disk/*.c"
+    "${CMAKE_SOURCE_DIR}/src/fs/*.c"
     "${CMAKE_SOURCE_DIR}/src/common/log.c"
 )
 
@@ -30,10 +33,12 @@ file(GLOB TEST_SOURCES
     "${CMAKE_SOURCE_DIR}/testing/test_hardwares/*.c"
     "${CMAKE_SOURCE_DIR}/testing/test_memory/*.c"
     "${CMAKE_SOURCE_DIR}/testing/test_process/*.c"
+    "${CMAKE_SOURCE_DIR}/testing/test_filesystem/*.c"
     "${CMAKE_SOURCE_DIR}/src/hardwares/*.c"
     "${CMAKE_SOURCE_DIR}/src/memory/*.c"
     "${CMAKE_SOURCE_DIR}/src/process/*.c"
     "${CMAKE_SOURCE_DIR}/src/disk/*.c"
+    "${CMAKE_SOURCE_DIR}/src/fs/*.c"
     "${CMAKE_SOURCE_DIR}/src/common/log.c"
 )
 

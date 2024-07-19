@@ -67,7 +67,7 @@ void register_disk(const char *disk_file) {
     strncpy(physical_disks[current_physical_disk_size].name, disk_name, DISK_NAME_MAX_LENGTH - 1);
     physical_disks[current_physical_disk_size].name[DISK_NAME_MAX_LENGTH - 1] = '\0';
 
-    FILE *file = fopen(disk_file, "rb+");
+    FILE *file = fopen(disk_file, "r+");
     if (file == NULL) {
         _ERROR("Failed to open disk file '%s' for reading and writing", disk_file);
         return;
@@ -97,12 +97,11 @@ size_t get_data_head_offset(FILE* file) {
 
 size_t get_byte_offset(FILE* file, size_t address) {
     size_t pos = get_data_head_offset(file);
-    size_t line = address / VIRTUAL_BYTES_PER_ROW;
-    size_t order = address % VIRTUAL_BYTES_PER_ROW;
-    pos += (line * BYTES_PER_DATA_ROW);
-    pos += (order * BYTES_PER_VIRTUAL_BYTE);
+    size_t head = pos;
+    pos += (address * BYTES_PER_VIRTUAL_BYTE + address / 16); 
     fseek(file, 0, SEEK_SET);
-    return pos;
+    _TEST("address is %zu, seek pos is %zu, head is %zu", address, pos, head);
+    return pos + address / 16;
 }
 
 void write_at(FILE* file, size_t address, unsigned char value) {

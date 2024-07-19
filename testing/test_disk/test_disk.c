@@ -2,6 +2,7 @@
 #include "test_disk.h"
 
 void test_disks() {
+    
     const char* disks[MAX_DISKS] = {
         "../src/hardwares/disks/disk0.disk",
         "../src/hardwares/disks/disk1.disk",
@@ -18,7 +19,7 @@ void test_disk_io() {
     FILE* disk0 = physical_disks[0].file;
     
     // 写入单个字节
-    size_t address = 0;
+    size_t address = 16;
     unsigned char write_value = 0x41; // 'A'
     write_at(disk0, address, write_value);
     _TEST("Wrote byte %02X at address %zu", write_value, address);
@@ -29,7 +30,7 @@ void test_disk_io() {
 
     // 写入多个字节
     unsigned char buffer_to_write[] = {0x42, 0x43, 0x44, 0x45}; // 'B', 'C', 'D', 'E'
-    write_buffer_at(disk0, address + 1, buffer_to_write, sizeof(buffer_to_write));
+    write_buffer_at(disk0, address + 15, buffer_to_write, sizeof(buffer_to_write));
     _TEST("Wrote bytes from address %zu to address %zu", address + 1, address + sizeof(buffer_to_write));
     
     // 读取多个字节
@@ -61,7 +62,7 @@ void test_virtual_disk() {
     if (!mount_disk_block(v_disk, 0, 0)) {
         _TEST("Failed to mount block 0 on disk 0");
     }
-    if (!mount_disk_block(v_disk, 0, 1)) {
+    if (!mount_disk_block(v_disk, 1, 0)) {
         _TEST("Failed to mount block 1 on disk 0");
     }
 
@@ -74,4 +75,53 @@ void test_virtual_disk() {
     }
 
     print_disk_blocks();
+}
+
+void test_virtual_disk_io() {
+    virtual_disk* v_disk = virtual_disks[virtual_disk_count];
+    // 测试单字节读写
+    size_t address = 64;
+    unsigned char write_byte = 0xAB;
+    write_virtual_disk_at(0, address, write_byte);
+    unsigned char read_byte = read_virtual_disk_at(0, address);
+    assert(read_byte == write_byte);
+
+    // 测试多字节读写
+    unsigned char write_buffer[128];
+    for (int i = 0; i < 128; i++) {
+        write_buffer[i] = (unsigned char)i;
+    }
+    write_bytes_virtual_disk_at(0, address, write_buffer, 128);
+    unsigned char* read_buffer = read_bytes_virtual_disk_at(0, address, 128);
+    assert(memcmp(write_buffer, read_buffer, 128) == 0);
+    free(read_buffer);
+
+    printf("All virtual disk IO tests passed.\n");
+}
+
+void create_disk_file(const char *filename, const char *disk_name, size_t disk_size) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Failed to create file");
+        return;
+    }
+    // 写入磁盘元数据
+    fprintf(file, "Disk Name: %s\n", disk_name);
+    fprintf(file, "Disk Size: %zu bytes\n", disk_size);
+    // 写入二进制数据
+    for (size_t i = 0; i < disk_size; i++) {
+        fprintf(file, "00 "); // 每个字节用 "00 " 表示
+        if ((i + 1) % 16 == 0) {
+            fprintf(file, "\n"); // 每行 16 个字节
+        }
+    }
+    fclose(file);
+    printf("Disk file '%s' created successfully.\n", filename);
+}
+
+void generate_disks(){
+    create_disk_file("../src/hardwares/disks/disk0.disk", "Samsung 990 pro", 256);
+    create_disk_file("../src/hardwares/disks/disk1.disk", "Samsung 990 pro", 512);
+    create_disk_file("../src/hardwares/disks/disk2.disk", "Samsung 990 pro", 1024);
+    create_disk_file("../src/hardwares/disks/disk3.disk", "Samsung 990 pro", 2048);
 }

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "log.h"
 #include "test_disk.h"
+#include "test_filesystem.h"
 // #include "test_hardwares.h"
 // #include "test_memory.h"
 // #include "test_process.h"
@@ -37,10 +38,15 @@ int main() {
     // test_cpu();
 
     _TEST("Running disk tests...");
+    generate_disks();
     test_disks();
     test_disk_io();
     test_disk_blocks();
     test_virtual_disk();
+    test_virtual_disk_io();
+
+    _TEST("Running filesystem tests...");
+    test_filesystem();
 
     _TEST("Running process tests...");
     // test_process();
