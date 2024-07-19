@@ -30,7 +30,7 @@ jobs:
     - name: Run tests
       run: |
         cd build
-        ./test.exe > test_output.log 2>&1
+        ./test > test_output.log 2>&1
       continue-on-error: true
       
     - name: Analyze test results
