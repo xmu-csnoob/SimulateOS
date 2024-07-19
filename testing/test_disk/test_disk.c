@@ -10,7 +10,7 @@ void test_disks() {
     };
     for (int i = 0; i < MAX_DISKS; i++) {
         register_disk(disks[i]);
-        _TEST("Test: register disk %d, disk name : %s, disk size : %d", i, physical_disks[i].name, physical_disks[i].size);
+        _TEST("Test: register disk %d, disk name : %s, disk size : %zu", i, physical_disks[i].name, physical_disks[i].size);
     }
 }
 
