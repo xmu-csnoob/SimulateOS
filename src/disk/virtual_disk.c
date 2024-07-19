@@ -28,7 +28,7 @@ void print_disk_blocks() {
         disk_blocks *dbs = disk_blocks_table[i];
         size_t blocks = dbs->block_count;
         _TRACE("Disk id: %d, has %zu blocks in total.\n", i, blocks);
-        for (size_t j = 0; j < blocks; j++) {
+        for (int j = 0; j < blocks; j++) {
             disk_block db = dbs->blocks[j];
             _TRACE("Block id %zu, %s\n", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
             if(db.mounted == 1){
