@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
     char* name;
-    size_t block_size;
+    size_t block_count;
     size_t size;
     disk_block* mounted_blocks;
 } virtual_disk;
@@ -42,6 +42,6 @@ unsigned char read_virtual_disk_at(int virtual_disk_id, size_t address);
 int write_virtual_disk_at(int virtual_disk_id, size_t address, unsigned char byte);
 
 unsigned char* read_bytes_virtual_disk_at(int virtual_disk_id, size_t address, size_t length);
-int write_bytes_virtual_disk_at(int virtual_disk_id, size_t address, const unsigned char* bytes, size_t length);
+int write_bytes_virtual_disk_at(int virtual_disk_id, size_t address, const unsigned char *bytes, size_t length);
 
 #endif

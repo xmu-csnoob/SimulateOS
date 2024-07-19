@@ -98,10 +98,9 @@ size_t get_data_head_offset(FILE* file) {
 size_t get_byte_offset(FILE* file, size_t address) {
     size_t pos = get_data_head_offset(file);
     size_t head = pos;
-    pos += (address * BYTES_PER_VIRTUAL_BYTE + address / 16); 
+    pos += (address * BYTES_PER_VIRTUAL_BYTE + address / VIRTUAL_BYTES_PER_ROW); 
     fseek(file, 0, SEEK_SET);
-    _TEST("address is %zu, seek pos is %zu, head is %zu", address, pos, head);
-    return pos + address / 16;
+    return pos + address / VIRTUAL_BYTES_PER_ROW;
 }
 
 void write_at(FILE* file, size_t address, unsigned char value) {

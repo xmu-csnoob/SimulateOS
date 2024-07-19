@@ -19,7 +19,7 @@ void test_disk_io() {
     FILE* disk0 = physical_disks[0].file;
     
     // 写入单个字节
-    size_t address = 16;
+    size_t address = 0;
     unsigned char write_value = 0x41; // 'A'
     write_at(disk0, address, write_value);
     _TEST("Wrote byte %02X at address %zu", write_value, address);
@@ -30,7 +30,7 @@ void test_disk_io() {
 
     // 写入多个字节
     unsigned char buffer_to_write[] = {0x42, 0x43, 0x44, 0x45}; // 'B', 'C', 'D', 'E'
-    write_buffer_at(disk0, address + 15, buffer_to_write, sizeof(buffer_to_write));
+    write_buffer_at(disk0, address + 1, buffer_to_write, sizeof(buffer_to_write));
     _TEST("Wrote bytes from address %zu to address %zu", address + 1, address + sizeof(buffer_to_write));
     
     // 读取多个字节
@@ -67,9 +67,9 @@ void test_virtual_disk() {
     }
 
     // 打印虚拟磁盘信息
-    _TEST("Virtual disk %s has size %zu and block count %zu", v_disk->name, v_disk->size, v_disk->block_size);
+    _TEST("Virtual disk %s has size %zu and block count %zu", v_disk->name, v_disk->size, v_disk->block_count);
 
-    for (size_t i = 0; i < v_disk->block_size; i++) {
+    for (size_t i = 0; i < v_disk->block_count; i++) {
         disk_block db = v_disk->mounted_blocks[i];
         _TEST("Block %zu: Disk ID %zu, Block ID %zu, Mounted %d", i, db.disk_id, db.block_id, db.mounted);
     }
@@ -78,9 +78,10 @@ void test_virtual_disk() {
 }
 
 void test_virtual_disk_io() {
-    virtual_disk* v_disk = virtual_disks[virtual_disk_count];
+    _TEST("----- test virtual disk io -----");
+    virtual_disk* v_disk = virtual_disks[0];
     // 测试单字节读写
-    size_t address = 64;
+    size_t address = 63;
     unsigned char write_byte = 0xAB;
     write_virtual_disk_at(0, address, write_byte);
     unsigned char read_byte = read_virtual_disk_at(0, address);
@@ -91,8 +92,9 @@ void test_virtual_disk_io() {
     for (int i = 0; i < 128; i++) {
         write_buffer[i] = (unsigned char)i;
     }
-    write_bytes_virtual_disk_at(0, address, write_buffer, 128);
-    unsigned char* read_buffer = read_bytes_virtual_disk_at(0, address, 128);
+    write_bytes_virtual_disk_at(0, 0, write_buffer, 128);
+    unsigned char* read_buffer = read_bytes_virtual_disk_at(0, 0, 128);
+    _TRACE("last char of read buffer is %d", read_buffer[127]);
     assert(memcmp(write_buffer, read_buffer, 128) == 0);
     free(read_buffer);
 

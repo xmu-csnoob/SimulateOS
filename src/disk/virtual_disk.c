@@ -4,7 +4,7 @@ disk_blocks* disk_blocks_table[MAX_DISKS];
 
 virtual_disk* virtual_disks[MAX_VIRTUAL_DISKS];
 
-int virtual_disk_count = 0;
+int virtual_disk_count = -1;
 
 void init_disk_blocks() {
     for (int i = 0; i < MAX_DISKS; i++) {
@@ -53,15 +53,17 @@ int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id) {
     disk_blocks_table[disk_id]->blocks[block_id].mounted = 1;
 
     // Reallocate memory to accommodate the new block
-    v_disk->mounted_blocks = (disk_block*)realloc(v_disk->mounted_blocks, sizeof(disk_block) * (v_disk->block_size + 1));
+    v_disk->mounted_blocks = (disk_block*)realloc(v_disk->mounted_blocks, sizeof(disk_block) * (v_disk->block_count + 1));
     if (v_disk->mounted_blocks == NULL) {
-        _ERROR("Error: memory reallocation failed\n, allocate size is %d", (int)(sizeof(disk_block) * (v_disk->block_size + 1)));
+        _ERROR("Error: memory reallocation failed\n, allocate size is %d", (int)(sizeof(disk_block) * (v_disk->block_count + 1)));
         return -1;
     }
     
-    v_disk->mounted_blocks[v_disk->block_size] = db;
-    v_disk->block_size++;
+    v_disk->mounted_blocks[v_disk->block_count] = db;
+    v_disk->block_count++;
     v_disk->size += DISK_BLOCK_SIZE;
+    v_disk->mounted_blocks[v_disk->block_count].mounted = 1;
+    _TEST("mount disk %zu block %zu to virtual disk %zu", disk_id, block_id, virtual_disk_count);
     return 1;
 }
 
@@ -73,10 +75,10 @@ virtual_disk* create_virtual_disk(const char* name) {
         return NULL;
     }
     v_disk->name = strdup(name);
-    v_disk->block_size = 0;
+    v_disk->block_count = 0;
     v_disk->size = 0;
     v_disk->mounted_blocks = NULL;
-    virtual_disks[virtual_disk_count++] = v_disk;
+    virtual_disks[++virtual_disk_count] = v_disk;
     return v_disk;
 }
 
@@ -110,47 +112,70 @@ int write_virtual_disk_at(int virtual_disk_id, size_t address, unsigned char byt
     return 0;
 }
 
+unsigned char* read_bytes_in_block(int virtual_disk_id, int block_id, size_t address, size_t length){
+    virtual_disk* v_disk = virtual_disks[virtual_disk_id];
+    disk_block* db = &v_disk->mounted_blocks[block_id];
+    if(address + length >= DISK_BLOCK_SIZE){
+        _ERROR("read block address out of bound : %zu", address + length);
+    }
+    size_t offset = block_id * DISK_BLOCK_SIZE + length;
+    unsigned char* data;
+    read_buffer_at(physical_disks[db->disk_id].file, offset, data, length);
+    return data;
+}
+
 unsigned char* read_bytes_virtual_disk_at(int virtual_disk_id, size_t address, size_t length) {
-    virtual_disk* disk = virtual_disks[virtual_disk_id];
-    unsigned char* buffer = (unsigned char*)malloc(length);
+    unsigned char *data = (unsigned char *)malloc(length);
+    if (!data) {
+        _ERROR("Memory allocation failed.");
+        return NULL;
+    }
 
     size_t bytes_read = 0;
+    virtual_disk* disk = virtual_disks[virtual_disk_id];
+
     while (bytes_read < length) {
-        int block_id = (address + bytes_read) / DISK_BLOCK_SIZE;
-        int block_offset = (address + bytes_read) % DISK_BLOCK_SIZE;
-        disk_block* db = &disk->mounted_blocks[block_id];
-        size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
-        
+        size_t block_id = (address + bytes_read) / DISK_BLOCK_SIZE;
+        size_t block_offset = (address + bytes_read) % DISK_BLOCK_SIZE;
         size_t bytes_to_read = DISK_BLOCK_SIZE - block_offset;
         if (bytes_to_read > length - bytes_read) {
             bytes_to_read = length - bytes_read;
         }
 
-        read_buffer_at(physical_disks[db->disk_id].file, disk_offset, buffer + bytes_read, bytes_to_read);
-        bytes_read += bytes_to_read;
-    }
-    
-    return buffer;
-}
-
-int write_bytes_virtual_disk_at(int virtual_disk_id, size_t address, const unsigned char* bytes, size_t length) {
-    virtual_disk* disk = virtual_disks[virtual_disk_id];
-
-    size_t bytes_written = 0;
-    while (bytes_written < length) {
-        int block_id = (address + bytes_written) / DISK_BLOCK_SIZE;
-        int block_offset = (address + bytes_written) % DISK_BLOCK_SIZE;
         disk_block* db = &disk->mounted_blocks[block_id];
         size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
-        
+
+        unsigned char buffer[bytes_to_read];
+        read_buffer_at(physical_disks[db->disk_id].file, disk_offset, buffer, bytes_to_read);
+
+        memcpy(data + bytes_read, buffer, bytes_to_read);
+
+        bytes_read += bytes_to_read;
+    }
+
+    return data;
+}
+
+int write_bytes_virtual_disk_at(int virtual_disk_id, size_t address, const unsigned char *bytes, size_t length) {
+    size_t bytes_written = 0;
+    virtual_disk* disk = virtual_disks[virtual_disk_id];
+
+    while (bytes_written < length) {
+        size_t block_id = (address + bytes_written) / DISK_BLOCK_SIZE;
+        size_t block_offset = (address + bytes_written) % DISK_BLOCK_SIZE;
         size_t bytes_to_write = DISK_BLOCK_SIZE - block_offset;
         if (bytes_to_write > length - bytes_written) {
             bytes_to_write = length - bytes_written;
         }
 
+        disk_block* db = &disk->mounted_blocks[block_id];
+        size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
+
         write_buffer_at(physical_disks[db->disk_id].file, disk_offset, bytes + bytes_written, bytes_to_write);
+
         bytes_written += bytes_to_write;
     }
 
     return 0;
 }
+
