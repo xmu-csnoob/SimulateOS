@@ -37,7 +37,7 @@ void print_disk_blocks() {
             }
         }
     }
-    _TEST("%d disk_blocks has been mounted");
+    _TEST("%d disk_blocks has been mounted", mounted_size);
 }
 
 int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id) {

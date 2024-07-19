@@ -72,4 +72,6 @@ void test_virtual_disk() {
         disk_block db = v_disk->mounted_blocks[i];
         _TEST("Block %zu: Disk ID %zu, Block ID %zu, Mounted %d", i, db.disk_id, db.block_id, db.mounted);
     }
+
+    print_disk_blocks();
 }
