@@ -33,7 +33,7 @@ void print_disk_blocks() {
             _TRACE("Block id %zu, %s\n", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
             if(db.mounted == 1){
                 mounted_size++;
-                _TEST("Block id %zu is mounted to virtual disk %zu", j, i);
+                _TEST("Block id %d is mounted to virtual disk %d", j, i);
             }
         }
     }
