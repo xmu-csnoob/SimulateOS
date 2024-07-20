@@ -31,6 +31,10 @@ static void init_log_level() {
     LOG_LEVEL = get_log_level();
 }
 
+static int set_log_level(int level){
+    LOG_LEVEL = level;
+}
+
 // 根据平台设置颜色
 #ifdef _WIN32
 #include <windows.h>

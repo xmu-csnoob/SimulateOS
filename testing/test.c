@@ -14,9 +14,6 @@ void set_log_level(const char *level) {
     _putenv(env_str);
 }
 #else
-void set_log_level(const char *level) {
-    setenv("LOG_LEVEL", level, 1);
-}
 #endif
 int main() {
     init_log_level();

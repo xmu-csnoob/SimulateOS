@@ -29,6 +29,8 @@ file_system_entity* create_entity(const char* name, file_type type, file_system_
     entity->parent = parent;
     entity->children_count = 0;
     entity->block_count = 0;
+    if(parent != NULL)
+        add_entity(parent, entity);
     return entity;
 }
 
@@ -51,24 +53,64 @@ int add_entity(file_system_entity *parent, file_system_entity *child) {
 
 // 查找实体
 file_system_entity* find_entity(file_system_entity *parent, const char *name) {
-    if (strcmp(parent->name, name) == 0) {
-        return parent;
+    _TRACE("find_entity : find %s in %s, dir has %zu child entities.", name, parent->name, parent->children_count);
+
+    if (parent == NULL || name == NULL || name[0] == '\0') {
+        return NULL;
     }
-    if (parent->type == DIR_TYPE) {
-        for (int i = 0; i < parent->children_count; i++) {
-            file_system_entity *child = parent->children[i];
-            file_system_entity *res = find_entity(child, name);
-            if (res != NULL) {
-                return res;
+
+    char path[256];
+    strncpy(path, name, sizeof(path) - 1);
+    path[sizeof(path) - 1] = '\0';
+
+    char *token = strtok(path, "/");
+    file_system_entity *current = parent;
+
+    while (token != NULL) {
+        _TRACE("find_entity : find %s in %s", token, current->name);
+
+        if (strcmp(token, ".") == 0) {
+            // Skip the current directory symbol
+            token = strtok(NULL, "/");
+            continue;
+        } else if (strcmp(token, "..") == 0) {
+            // Move to the parent directory
+            if (current->parent != NULL) {
+                current = current->parent;
+            }
+            token = strtok(NULL, "/");
+            continue;
+        }
+
+        if (current->type != DIR_TYPE) {
+            _TRACE("find_entity : %s is not a directory", current->name);
+            return NULL;
+        }
+
+        int found = 0;
+        for (int i = 0; i < current->children_count; i++) {
+            if (strcmp(current->children[i]->name, token) == 0) {
+                current = current->children[i];
+                found = 1;
+                break;
             }
         }
+
+        if (!found) {
+            _TRACE("find_entity : can't find %s in %s", token, current->name);
+            return NULL;
+        }
+
+        token = strtok(NULL, "/");
     }
-    return NULL;
+
+    return current;
 }
+
 
 // 打印实体
 void print_entity(file_system_entity *entity, const char* prefix) {
-    printf("%s/%s\n", prefix, entity->name);
+    printf("%s/%s ", prefix, entity->name);
 
     char* new_prefix = (char*)malloc(strlen(prefix) + strlen(entity->name) + 2); // +2 for '/' and '\0'
     sprintf(new_prefix, "%s/%s", prefix, entity->name);
@@ -88,7 +130,38 @@ void print_filesystem(file_system *fs) {
 }
 
 void print_dir(file_system_entity *dir) {
-    print_entity(dir, dir->name);
+    for(int i = 0; i < dir->children_count; i++){
+        printf("%s%c ", dir->children[i]->name, (dir->children[i]->type == DIR_TYPE) ? '/' : ' ');
+    }
+}
+
+
+char* get_entity_absolute_path(file_system_entity* entity) {
+    if (entity == NULL) {
+        return NULL;
+    }
+    // Calculate the length of the resulting path
+    size_t name_length = strlen(entity->name);
+    size_t parent_path_length = entity->parent ? strlen(get_entity_absolute_path(entity->parent)) : 0;
+    size_t total_length = parent_path_length + 1 + name_length + 1; // 1 for '/' and 1 for null terminator
+
+    // Allocate memory for the result
+    char* path = (char*)malloc(total_length * sizeof(char));
+    if (path == NULL) {
+        _TRACE("Memory allocation failed");
+        return NULL;
+    }
+
+    // Construct the path
+    path[0] = '\0'; // Initialize the path to an empty string
+    if (entity->parent) {
+        strcat(path, get_entity_absolute_path(entity->parent));
+    }
+    strcat(path, "/");
+    strcat(path, entity->name);
+
+    _TRACE("get_entity_absolute_path : path is %s", path);
+    return path;
 }
 
 // 写入文件内容

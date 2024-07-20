@@ -51,6 +51,8 @@ file_system_entity* find_entity(file_system_entity *parent, const char *name);
 void print_filesystem(file_system *fs);
 void print_dir(file_system_entity *dir);
 
+char* get_entity_absolute_path(file_system_entity* entity);
+
 // 文件读写
 int write_file(file_system* fs, file_system_entity *file, const char *data, size_t length);
 unsigned char* read_file(file_system_entity *file);
