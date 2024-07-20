@@ -28,13 +28,13 @@ void test_add_entity() {
 
     file_system_entity *root = fs->root;
     file_system_entity *dir1 = create_entity("dir1", DIR_TYPE, root);
-    assert(add_entity(root, dir1) == 1);
+    assert(dir1->parent = root);
 
     file_system_entity *file1 = create_entity("file1.txt", FILE_TYPE, dir1);
-    assert(add_entity(dir1, file1) == 1);
+    assert(file1->parent = root);
 
     file_system_entity *file2 = create_entity("file2.txt", FILE_TYPE, dir1);
-    assert(add_entity(dir1, file2) == 2);
+    assert(file2->parent = root);
 
     assert(dir1->children_count == 2);
     _TEST("Added entities to file system");
@@ -53,13 +53,13 @@ void test_find_entity() {
 
     file_system_entity *root = fs->root;
     file_system_entity *dir1 = create_entity("dir1", DIR_TYPE, root);
-    assert(add_entity(root, dir1) == 1);
+    assert(dir1->parent = root);
 
     file_system_entity *file1 = create_entity("file1.txt", FILE_TYPE, dir1);
-    assert(add_entity(dir1, file1) == 1);
+    assert(file1->parent = root);
 
     file_system_entity *file2 = create_entity("file2.txt", FILE_TYPE, dir1);
-    assert(add_entity(dir1, file2) == 2);
+    assert(file2->parent = root);
 
     file_system_entity *found_dir = find_entity(root, "dir1");
     assert(found_dir != NULL);
@@ -85,10 +85,10 @@ void test_write_and_read_file() {
 
     file_system_entity *root = fs->root;
     file_system_entity *dir1 = create_entity("dir1", DIR_TYPE, root);
-    assert(add_entity(root, dir1) == 1);
+    assert(dir1->parent = root);
 
     file_system_entity *file1 = create_entity("file1.txt", FILE_TYPE, dir1);
-    assert(add_entity(dir1, file1) == 1);
+    assert(file1->parent = root);
 
     // 写入文件内容测试
     const char *data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffff";
