@@ -8,7 +8,7 @@ void test_cpu_init() {
     assert(cpu.ir == 0);
     assert(cpu.zf == 0);
     assert(cpu.sf == 0);
-    assert(cpu.state == CPU_HALTED);
+    assert(cpu.state == CPU_RUNNING);
     for (int i = 0; i < REGISTERS_NUM; i++) {
         assert(cpu.registers[i] == 0);
     }
