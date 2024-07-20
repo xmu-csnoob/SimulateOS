@@ -1,5 +1,7 @@
 #include "filesystem.h"
 
+file_system* system_file_system;
+
 // 创建文件系统
 file_system* create_file_system(virtual_disk** v_disks) {
     size_t v_disks_size = sizeof(v_disks) / sizeof(virtual_disk*);
@@ -8,6 +10,7 @@ file_system* create_file_system(virtual_disk** v_disks) {
         _ERROR("create_file_system : fail on creating fs, trying to mount %zu virtual disks which is larger than the limit of %d virtual disks", v_disks_size, FS_MAX_VIRTUAL_DISKS);
     }
     file_system* fs = (file_system*)malloc(sizeof(file_system));
+    fs->v_disk_count = 0;
     for(int i = 0; i < v_disks_size; i++){
         fs->v_disks[i] = v_disks[i];
         fs->v_disk_count++;
@@ -82,6 +85,10 @@ void print_entity(file_system_entity *entity, const char* prefix) {
 // 打印文件系统
 void print_filesystem(file_system *fs) {
     print_entity(fs->root, "");
+}
+
+void print_dir(file_system_entity *dir) {
+    print_entity(dir, dir->name);
 }
 
 // 写入文件内容

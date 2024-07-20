@@ -115,34 +115,10 @@ void write_at(FILE* file, size_t address, unsigned char value) {
 }
 
 void write_buffer_at(FILE* file, size_t address, const unsigned char* buffer, size_t bufferSize) {
-    size_t file_pos = get_byte_offset(file, address);
-    _TRACE("write_buffer_at : writing %zu bytes at address %zu (file position %zu)", bufferSize, address, file_pos);
-
-    if (fseek(file, file_pos, SEEK_SET) != 0) {
-        _ERROR("Failed to seek to file position %zu", file_pos);
-        return;
-    }
-
     for (size_t i = 0; i < bufferSize; i++) {
-        char hex_value[3];
-        snprintf(hex_value, sizeof(hex_value), "%02X", buffer[i]);
-
-        fputc(hex_value[0], file);
-        fputc(hex_value[1], file);
-
-        // Skip " " and handle newlines every 16 bytes
-        if ((i + 1) % 16 == 0) {
-            fputc('\n', file);
-        } else {
-            fputc(' ', file);
-        }
+        write_at(file, address + i, buffer[i]);
     }
-
-    fflush(file);
-    _TRACE("write_buffer_at : successfully wrote %zu bytes at address %zu", bufferSize, address);
 }
-
-
 
 unsigned char read_at(FILE* file, size_t address) {
     _TRACE("read_at : try to read byte at address %zu from physical disk", address);
@@ -156,29 +132,9 @@ unsigned char read_at(FILE* file, size_t address) {
 }
 
 void read_buffer_at(FILE* file, size_t address, unsigned char* buffer, size_t bufferSize) {
-    size_t file_pos = get_byte_offset(file, address);
-    _TRACE("read_buffer_at : reading %zu bytes at address %zu (file position %zu)", bufferSize, address, file_pos);
-
-    if (fseek(file, file_pos, SEEK_SET) != 0) {
-        _ERROR("Failed to seek to file position %zu", file_pos);
-        return;
-    }
-
+    _TRACE("read_buffer_at : try to read %zu bytes at address %zu from physical disk", bufferSize, address);
     for (size_t i = 0; i < bufferSize; i++) {
-        char hex_value[3] = {0};
-        hex_value[0] = fgetc(file);
-        hex_value[1] = fgetc(file);
-
-        buffer[i] = (unsigned char)strtol(hex_value, NULL, 16);
-
-        // Skip " " and handle newlines every 16 bytes
-        if ((i + 1) % 16 == 0) {
-            fgetc(file); // Skip newline
-        } else {
-            fgetc(file); // Skip space
-        }
+        buffer[i] = read_at(file, address + i);
     }
-
-    _TRACE("read_buffer_at : successfully read %zu bytes at address %zu, data is %s", bufferSize, address, buffer);
+    _TRACE("read_buffer_at : success to read %zu bytes at address %zu from physical disk, data is %s", bufferSize, address, buffer);
 }
-

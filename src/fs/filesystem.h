@@ -33,6 +33,8 @@ typedef struct {
     size_t v_disk_count;
 } file_system;
 
+extern file_system* system_file_system;
+
 // 创建文件系统
 file_system* create_file_system(virtual_disk** v_disks);
 
@@ -47,6 +49,7 @@ file_system_entity* find_entity(file_system_entity *parent, const char *name);
 
 // 打印文件系统
 void print_filesystem(file_system *fs);
+void print_dir(file_system_entity *dir);
 
 // 文件读写
 int write_file(file_system* fs, file_system_entity *file, const char *data, size_t length);
