@@ -158,9 +158,7 @@ unsigned char* read_bytes_virtual_disk_at(int virtual_disk_id, size_t address, s
 
         unsigned char* buffer = (unsigned char*)malloc(bytes_to_read * sizeof(unsigned char *));
         read_buffer_at(physical_disks[db->disk_id].file, disk_offset, buffer, bytes_to_read);
-
         memcpy(data + bytes_read, buffer, bytes_to_read);
-
         bytes_read += bytes_to_read;
     }
     _TRACE("read_bytes_virtual_disk_at : success on reading %zu bytes on address %zu from virtual disk %s, data is %s", length, address, virtual_disks[virtual_disk_id]->name, data);
@@ -174,10 +172,7 @@ int write_bytes_virtual_disk_at(int virtual_disk_id, size_t address, const unsig
     while (bytes_written < length) {
         size_t block_id = (address + bytes_written) / DISK_BLOCK_SIZE;
         size_t block_offset = (address + bytes_written) % DISK_BLOCK_SIZE;
-        size_t bytes_to_write = DISK_BLOCK_SIZE - block_offset;
-        if (bytes_to_write > length - bytes_written) {
-            bytes_to_write = length - bytes_written;
-        }
+        size_t bytes_to_write = (length - bytes_written > DISK_BLOCK_SIZE - block_offset) ? DISK_BLOCK_SIZE - block_offset : length - bytes_written;
 
         disk_block* db = &disk->mounted_blocks[block_id];
         size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;

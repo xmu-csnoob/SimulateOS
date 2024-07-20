@@ -97,7 +97,7 @@ void test_virtual_disk_io() {
     write_virtual_disk_at(0, address, write_byte);
     unsigned char read_byte = read_virtual_disk_at(0, address);
     assert(read_byte == write_byte);
-    _TRACE("Single byte read/write passed at address %zu", address);
+    _TEST("Single byte read/write passed at address %zu", address);
 
     // 测试多字节读写
     unsigned char write_buffer[128];
@@ -107,7 +107,7 @@ void test_virtual_disk_io() {
     write_bytes_virtual_disk_at(0, 0, write_buffer, 128);
     unsigned char* read_buffer = read_bytes_virtual_disk_at(0, 0, 128);
     assert(memcmp(write_buffer, read_buffer, 128) == 0);
-    _TRACE("Multiple byte read/write passed for 128 bytes");
+    _TEST("Multiple byte read/write passed for 128 bytes");
 
     free(read_buffer);
     _TEST("test_virtual_disk_io passed.");
