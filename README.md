@@ -27,3 +27,21 @@ provide virtual disks and io operations.
 ## Updates
 
 2024/7/18: first time of README update, now the kernel has some simple memory control and disk simulation, however still far from running a stored program.
+
+
+## Compile and Run
+
+### 1. create /build directory
+
+```bash
+cd SimulateOS
+mkdir build
+cd build
+```
+
+### 2. (optional) install cmake (for example on Ubuntu)
+
+```bash
+sudo apt-get update
+sudo apt-get install cmake
+```
