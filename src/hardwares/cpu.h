@@ -25,6 +25,7 @@ typedef enum {
     JL,
     JG,
     JZ,
+    JNZ,
     JLZ,
     HALT
 } instruction_set;

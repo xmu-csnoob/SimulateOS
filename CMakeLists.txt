@@ -24,7 +24,7 @@ file(GLOB KERNEL_SOURCES
     "${CMAKE_SOURCE_DIR}/src/process/*.c"
     "${CMAKE_SOURCE_DIR}/src/disk/*.c"
     "${CMAKE_SOURCE_DIR}/src/fs/*.c"
-    "${CMAKE_SOURCE_DIR}/src/common/log.c"
+    "${CMAKE_SOURCE_DIR}/src/common/*.c"
 )
 
 file(GLOB TEST_SOURCES
@@ -39,7 +39,7 @@ file(GLOB TEST_SOURCES
     "${CMAKE_SOURCE_DIR}/src/process/*.c"
     "${CMAKE_SOURCE_DIR}/src/disk/*.c"
     "${CMAKE_SOURCE_DIR}/src/fs/*.c"
-    "${CMAKE_SOURCE_DIR}/src/common/log.c"
+    "${CMAKE_SOURCE_DIR}/src/common/*.c"
 )
 
 # 添加可执行文件

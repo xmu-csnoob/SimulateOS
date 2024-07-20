@@ -24,11 +24,6 @@ provide a simple file system
 
 provide virtual disks and io operations.
 
-## Updates
-
-2024/7/18: first time of README update, now the kernel has some simple memory control and disk simulation, however still far from running a stored program.
-
-
 ## Compile and Run
 
 ### 1. create /build directory
@@ -45,3 +40,17 @@ cd build
 sudo apt-get update
 sudo apt-get install cmake
 ```
+
+### 3. compile
+
+```bash
+cmake ..
+make
+```
+
+### 4. run
+```bash
+# run kernel
+./kernel
+# run testcases
+./test

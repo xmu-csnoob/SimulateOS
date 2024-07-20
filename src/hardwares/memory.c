@@ -21,10 +21,10 @@ void assign_physical_memory(size_t pos, BYTE* data, size_t size){
             memcpy(&memory[pos], data, size);
         }else{
             memcpy(&memory[pos], data, MEMORY_SIZE - pos);
-            printf("\nWarning: Data truncated as it exceeds memory boundary. \n");
+            _WARN("assign_physical_memory: Data truncated as it exceeds memory boundary.");
         }
     }else{
-        printf("\nError: Invalid memory pos for assignment. \n");
+        _ERROR("assign_physical_memory: Invalid memory pos for assignment.");
     }
 }
 

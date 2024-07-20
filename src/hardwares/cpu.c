@@ -12,85 +12,127 @@ void init_cpu(CPU* cpu) {
 }
 
 void execute_instruction(CPU* cpu, instruction* inst) {
-    _TRACE("\n-------------cpu execute start-----------\n");
-    _TRACE("\npc = %d\n", cpu->pc);
+    _TRACE("-------------cpu execute start-----------");
+    _TRACE("pc = %d", cpu->pc);
 
     switch (inst->opcode) {
         case NOP:
             break;
         case LOAD:
-            _TRACE("\n LOAD\n");
+            _TRACE("LOAD");
             cpu->registers[inst->operand1] = inst->operand2;
             break;
         case ADD:
-            _TRACE("\n ADD \n");
+            _TRACE("ADD");
             cpu->registers[inst->operand1] = cpu->registers[inst->operand2] + cpu->registers[inst->operand3];
             break;
         case SUB:
-            _TRACE("\n SUB \n");
+            _TRACE("SUB");
             cpu->registers[inst->operand1] = cpu->registers[inst->operand2] - cpu->registers[inst->operand3];
             break;
         case CMP:
-            _TRACE("\n CMP \n");
+            _TRACE("CMP");
             cpu->zf = (cpu->registers[inst->operand1] == cpu->registers[inst->operand2]) ? 1 : 0;
             cpu->sf = (cpu->registers[inst->operand1] < cpu->registers[inst->operand2]) ? 1 : 0;
             break;
         case JE:
-            _TRACE("\n JE \n");
+            _TRACE("JE");
             if (cpu->zf == 1) {
                 cpu->pc = inst->operand1;
-                _TRACE("\n pc = %d\n", cpu->pc);
+                _TRACE("pc = %d", cpu->pc);
                 return;
             }
             break;
         case JNE:
-            _TRACE("\n JNE \n");
+            _TRACE("JNE");
             if (cpu->zf != 1) {
                 cpu->pc = inst->operand1;
-                _TRACE("\n pc = %d\n", cpu->pc);
+                _TRACE("pc = %d", cpu->pc);
+                return;
+            }
+            break;
+        case JL:
+            _TRACE("JL");
+            if (cpu->sf == 1){
+                cpu->pc = inst->operand1;
+                _TRACE("pc = %d", cpu->pc);
+                return;
+            }
+            break;
+        case JG:
+            _TRACE("JG");
+            if (cpu->sf == 0){
+                cpu->pc = inst->operand1;
+                _TRACE("pc = %d", cpu->pc);
+                return;
+            }
+            break;
+        case JZ:
+            _TRACE("JZ");
+            if(cpu->zf == 1){
+                cpu->pc = inst->operand1;
+                _TRACE("pc = %d", cpu->pc);
+                return;
+            }
+            break;
+        case JNZ:
+            _TRACE("JNZ");
+            if(cpu->zf != 1){
+                cpu->pc = inst->operand1;
+                _TRACE("pc = %d", cpu->pc);
+                return;
+            }
+            break;
+        case JLZ:
+            _TRACE("JLZ");
+            if(cpu->zf == 1 && cpu->sf == 1){
+                cpu->pc = inst->operand1;
+                _TRACE("pc = %d", cpu->pc);
                 return;
             }
             break;
         case JUMP:
-            _TRACE("\n JUMP \n");
-            _TRACE("\n pc = %d\n", cpu->pc);
+            _TRACE("JUMP");
+            _TRACE("pc = %d", cpu->pc);
             cpu->pc = inst->operand1;
             return;
         case HALT:
-            _TRACE("\n HALT \n");
+            _TRACE("HALT");
             cpu->state = CPU_HALTED;
             return;
         default:
             break;
     }
     cpu->pc++;
-    _TRACE("\n pc = %d\n", cpu->pc);
-    _TRACE("\n-------------cpu execute end-----------\n");
+    _TRACE("pc = %d", cpu->pc);
+    _TRACE("-------------cpu execute end-----------");
 }
 
 void print_cpu_state(CPU *cpu) {
-    _TRACE("-------------CPU State Start--------------\n");
-    _TRACE("PC: %d\n", cpu->pc);
-    _TRACE("IR: %d\n", cpu->ir);
-    _TRACE("ZF: %d\n", cpu->zf);
-    _TRACE("SF: %d\n", cpu->sf);
+    _TRACE("-------------CPU State Start--------------");
+    _TRACE("PC: %d", cpu->pc);
+    _TRACE("IR: %d", cpu->ir);
+    _TRACE("ZF: %d", cpu->zf);
+    _TRACE("SF: %d", cpu->sf);
     for (int i = 0; i < REGISTERS_NUM; i++) {
-        _TRACE("R%d: %d\n", i, cpu->registers[i]);
+        _TRACE("R%d: %d", i, cpu->registers[i]);
     }
-    _TRACE("State: %s\n", cpu->state == CPU_RUNNING ? "RUNNING" : "HALTED");
-    _TRACE("-------------CPU State End--------------\n");
+    _TRACE("State: %s", cpu->state == CPU_RUNNING ? "RUNNING" : "HALTED");
+    _TRACE("-------------CPU State End--------------");
 }
 
 size_t translate_virtual_address(size_t virtual_address){
     size_t virtual_page = virtual_address / V_PAGE_SIZE;
     size_t offset = virtual_address % V_PAGE_SIZE;
+    _TRACE("translate_virtual_address : translate virutal address %zu, virtual page id is %zu, page offset is %zu", virtual_address, virtual_page, offset);
+
     if(virtual_page < 0 || virtual_page >= V_PAGE_NUMS){
-        printf("\nError: Invalid virtual address \n");
+        printf("Error: Invalid virtual address");
         return 0;
     }
 
     if(!page_table[virtual_page].valid){
-        printf("\nError: Page Not Mapped \n");
+        printf("Error: Page Not Mapped");
         return -1;
     }
 
@@ -103,7 +145,7 @@ size_t translate_virtual_address(size_t virtual_address){
 BYTE* access_memory(size_t pos){
     pos = translate_virtual_address(pos);
     if(pos == -1){
-        printf("\nWarning: trying to access unauthorized memory.\n");
+        printf("Warning: trying to access unauthorized memory.");
         return NULL;
     }
     if(pos >= 0 && pos < MEMORY_SIZE){
@@ -115,7 +157,7 @@ BYTE* access_memory(size_t pos){
 void assign_memory(size_t pos, BYTE* data, size_t size){
     pos = translate_virtual_address(pos);
     if(pos == -1){
-        printf("\nWarning: trying to assign unauthorized memory.\n");
+        printf("Warning: trying to assign unauthorized memory.");
         return;
     }
     if(pos >= 0 && pos < MEMORY_SIZE){
@@ -123,9 +165,9 @@ void assign_memory(size_t pos, BYTE* data, size_t size){
             memcpy(&memory[pos], data, size);
         }else{
             memcpy(&memory[pos], data, MEMORY_SIZE - pos);
-            printf("\nWarning: Data truncated as it exceeds memory boundary. \n");
+            printf("Warning: Data truncated as it exceeds memory boundary.");
         }
     }else{
-        printf("\nError: Invalid memory pos for assignment. \n");
+        printf("Error: Invalid memory pos for assignment.");
     }
 }

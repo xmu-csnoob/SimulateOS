@@ -39,11 +39,11 @@ void print_disk_blocks() {
             _TRACE("Block id %d, %s", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
             if(db.mounted == 1){
                 mounted_size++;
-                _TEST("Block id %d is mounted to virtual disk %d", j, i);
+                _TRACE("Block id %d is mounted to virtual disk %d", j, i);
             }
         }
     }
-    _TEST("%d disk_blocks has been mounted", mounted_size);
+    _TRACE("%d disk_blocks has been mounted", mounted_size);
 }
 
 int mount_disk_block(size_t v_disk_id, size_t disk_id, size_t block_id) {
@@ -67,7 +67,7 @@ int mount_disk_block(size_t v_disk_id, size_t disk_id, size_t block_id) {
     v_disk->mounted_blocks[v_disk->block_count].mounted = 1;
     v_disk->mounted_blocks[v_disk->block_count].mounted_virtual_disk_id = v_disk_id;
     v_disk->block_count++;
-    _TEST("mount disk %zu block %zu to virtual disk %d", disk_id, block_id, virtual_disk_count);
+    _TRACE("mount disk %zu block %zu to virtual disk %d", disk_id, block_id, virtual_disk_count);
     return 1;
 }
 

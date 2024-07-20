@@ -4,8 +4,7 @@
 #include "log.h"
 #include "test_disk.h"
 #include "test_filesystem.h"
-// #include "test_hardwares.h"
-// #include "test_memory.h"
+#include "test_hardwares.h"
 // #include "test_process.h"
 
 #ifdef _WIN32
@@ -19,34 +18,18 @@ void set_log_level(const char *level) {
     setenv("LOG_LEVEL", level, 1);
 }
 #endif
-
 int main() {
-    // 初始化日志级别
-
-    // set_log_level("0");
-
     init_log_level();
-
     generate_disks();
     // 运行测试
     _TEST("Running hardware tests...");
-    // test_hardwares();
-
-    _TEST("Running memory tests...");
-    // test_memory();
-
-    _TEST("Running CPU tests...");
-    // test_cpu();
+    test_hardwares();
 
     _TEST("Running disk tests...");
     test_disks();
-    test_disk_io();
-    test_disk_blocks();
-    test_virtual_disk();
-    test_virtual_disk_io();
 
     _TEST("Running filesystem tests...");
-    test_filesystem();
+    test_file_system();
 
     _TEST("Running process tests...");
     // test_process();

@@ -3,6 +3,8 @@
 #define MEMORY_SIZE 1024
 #include <stdio.h>
 #include <string.h>
+#include "log.h"
+
 typedef unsigned char BYTE;
 
 extern BYTE memory[MEMORY_SIZE];
