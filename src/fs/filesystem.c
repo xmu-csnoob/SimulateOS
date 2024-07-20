@@ -105,10 +105,10 @@ int write_file(file_system* fs, file_system_entity *file, const char *data, size
     disk_block* allocated_blocks[blocks_needed];
     for (int vd = 0; vd < fs->v_disk_count && blocks_allocated < blocks_needed; vd++) {
         virtual_disk* v_disk = fs->v_disks[vd];
-        _TEST("virtual disk is %s, has %zu blocks", v_disk->name, v_disk->block_count);
+        _TRACE("virtual disk is %s, has %zu blocks", v_disk->name, v_disk->block_count);
         for (int blk = 0; blk < v_disk->block_count && blocks_allocated < blocks_needed; blk++) {
             disk_block* block = &v_disk->mounted_blocks[blk];
-            _TEST("block occupied is %d", block->occupied);
+            _TRACE("block occupied is %d", block->occupied);
             if (block->occupied == 0) {
                 allocated_blocks[blocks_allocated++] = block;
                 _TRACE("write_file: found available block %zu on physical disk %zu for file %s", block->block_id, block->disk_id, file->name);
