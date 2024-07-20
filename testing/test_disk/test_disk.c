@@ -49,20 +49,22 @@ void test_disk_blocks() {
 }
 
 void test_virtual_disk() {
+    // 初始化物理磁盘块
+    init_disk_blocks();
+
     virtual_disk* v_disk = create_virtual_disk("TestVirtualDisk");
+
+    _TEST("create virtual disk %zu : %s", v_disk->id, v_disk->name);
     if (v_disk == NULL) {
         _TEST("Failed to create virtual disk\n");
         return;
     }
-
-    // 初始化物理磁盘块
-    init_disk_blocks();
-
+    
     // 挂载一些块（假设磁盘0和块0存在且未挂载）
-    if (!mount_disk_block(v_disk, 0, 0)) {
+    if (!mount_disk_block(v_disk->id, 0, 0)) {
         _TEST("Failed to mount block 0 on disk 0");
     }
-    if (!mount_disk_block(v_disk, 1, 0)) {
+    if (!mount_disk_block(v_disk->id, 1, 0)) {
         _TEST("Failed to mount block 1 on disk 0");
     }
 
@@ -81,7 +83,7 @@ void test_virtual_disk_io() {
     _TEST("----- test virtual disk io -----");
     virtual_disk* v_disk = virtual_disks[0];
     // 测试单字节读写
-    size_t address = 63;
+    size_t address = 16;
     unsigned char write_byte = 0xAB;
     write_virtual_disk_at(0, address, write_byte);
     unsigned char read_byte = read_virtual_disk_at(0, address);

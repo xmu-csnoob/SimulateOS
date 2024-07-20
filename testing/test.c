@@ -23,12 +23,11 @@ void set_log_level(const char *level) {
 int main() {
     // 初始化日志级别
 
-    set_log_level("5");
+    // set_log_level("0");
 
     init_log_level();
 
     generate_disks();
-    init_disk_blocks();
     // 运行测试
     _TEST("Running hardware tests...");
     // test_hardwares();
@@ -40,11 +39,11 @@ int main() {
     // test_cpu();
 
     _TEST("Running disk tests...");
-    // test_disks();
-    // test_disk_io();
-    // test_disk_blocks();
-    // test_virtual_disk();
-    // test_virtual_disk_io();
+    test_disks();
+    test_disk_io();
+    test_disk_blocks();
+    test_virtual_disk();
+    test_virtual_disk_io();
 
     _TEST("Running filesystem tests...");
     test_filesystem();

@@ -1,10 +1,19 @@
 #include "filesystem.h"
 
 // 创建文件系统
-file_system* create_file_system(virtual_disk* v_disks) {
+file_system* create_file_system(virtual_disk** v_disks) {
+    size_t v_disks_size = sizeof(v_disks) / sizeof(virtual_disk*);
+    _TRACE("create_file_system : create fs, has %zu virtual disks", v_disks_size);
+    if(v_disks_size > FS_MAX_VIRTUAL_DISKS){
+        _ERROR("create_file_system : fail on creating fs, trying to mount %zu virtual disks which is larger than the limit of %d virtual disks", v_disks_size, FS_MAX_VIRTUAL_DISKS);
+    }
     file_system* fs = (file_system*)malloc(sizeof(file_system));
+    for(int i = 0; i < v_disks_size; i++){
+        fs->v_disks[i] = v_disks[i];
+        fs->v_disk_count++;
+    }
     fs->root = create_entity("root", DIR_TYPE, NULL);
-    fs->v_disks = v_disks;
+    _TRACE("create_file_system : success on creating fs, has %zu virtual disks", fs->v_disk_count);
     return fs;
 }
 
@@ -76,66 +85,79 @@ void print_filesystem(file_system *fs) {
 }
 
 // 写入文件内容
-int write_file(file_system_entity *file, const char *data, size_t length) {
+int write_file(file_system* fs, file_system_entity *file, const char *data, size_t length) {
     if (file->type != FILE_TYPE) {
-        _ERROR("%s is not a file.", file->name);
+        _ERROR("write_file : %s is not a file.", file->name);
         return -1;
     }
 
     size_t blocks_needed = (length + DISK_BLOCK_SIZE - 1) / DISK_BLOCK_SIZE;
     if (blocks_needed > MAX_FILES) {
-        _ERROR("File size exceeds the maximum number of blocks.");
+        _ERROR("write_file : File size exceeds the maximum number of blocks.");
         return -1;
     }
-    _TEST("data length is %d, blocks needed is %zu", length, blocks_needed);
+    _TRACE("write_file : written data length is %zu, blocks needed is %zu", length, blocks_needed);
     file->block_count = blocks_needed;
     file->size = length;
 
     // 遍历所有虚拟磁盘和它们的块，找到足够的块来存储文件数据
     size_t blocks_allocated = 0;
-    for (int vd = 0; vd <= virtual_disk_count && blocks_allocated < blocks_needed; vd++) {
-        _TEST("virtual disk is %s, has %zu blocks", virtual_disks[vd]->name, virtual_disks[vd]->block_count);
-        for (int blk = 0; blk < virtual_disks[vd]->block_count && blocks_allocated < blocks_needed; blk++) {
-            _TEST("block mounted is %d", virtual_disks[vd]->mounted_blocks[blk].mounted);
-            if (virtual_disks[vd]->mounted_blocks[blk].mounted == 0) {
-                file->blocks[blocks_allocated++] = &virtual_disks[vd]->mounted_blocks[blk];
+    disk_block* allocated_blocks[blocks_needed];
+    for (int vd = 0; vd < fs->v_disk_count && blocks_allocated < blocks_needed; vd++) {
+        virtual_disk* v_disk = fs->v_disks[vd];
+        _TEST("virtual disk is %s, has %zu blocks", v_disk->name, v_disk->block_count);
+        for (int blk = 0; blk < v_disk->block_count && blocks_allocated < blocks_needed; blk++) {
+            disk_block* block = &v_disk->mounted_blocks[blk];
+            _TEST("block occupied is %d", block->occupied);
+            if (block->occupied == 0) {
+                allocated_blocks[blocks_allocated++] = block;
+                _TRACE("write_file: found available block %zu on physical disk %zu for file %s", block->block_id, block->disk_id, file->name);
             }
         }
     }
-
     if (blocks_allocated < blocks_needed) {
-        _ERROR("Not enough blocks available to write the file.");
+        _ERROR("write_file: Not enough blocks available to write the file.");
         return -1;
     }
 
+    for(int i = 0; i < blocks_allocated; i++){
+        file->blocks[i] = allocated_blocks[i];
+    }
+
     // 写入文件内容
-    for (size_t i = 0; i < length; i++) {
-        size_t block_id = i / DISK_BLOCK_SIZE;
-        size_t block_offset = i % DISK_BLOCK_SIZE;
-        write_virtual_disk_at(file->blocks[block_id]->disk_id, file->blocks[block_id]->block_id * DISK_BLOCK_SIZE + block_offset, data[i]);
+    size_t data_pos = 0;
+    for (size_t i = 0; i < blocks_allocated; i++) {
+        disk_block* block = file->blocks[i];
+        _TRACE("write_file: trying to write data to block %zu on physical disk %zu", block->block_id, block->disk_id);
+        size_t written_bytes_len = ((length - data_pos) > DISK_BLOCK_SIZE) ? DISK_BLOCK_SIZE : length - data_pos;
+        write_bytes_virtual_disk_at(block->mounted_virtual_disk_id, i * DISK_BLOCK_SIZE, data + data_pos, written_bytes_len);
+        data_pos += written_bytes_len;
     }
 
     return length;
 }
 
 // 读取文件内容
-char* read_file(file_system_entity *file, size_t *length) {
+unsigned char* read_file(file_system_entity *file) {
     if (file->type != FILE_TYPE) {
-        _ERROR("%s is not a file.", file->name);
+        _ERROR("read_file: %s is not a file.", file->name);
         return NULL;
     }
 
-    *length = file->size;
-    char *content = (char*)malloc(file->size);
+    size_t length = file->size;
+    unsigned char *content = (unsigned char*)malloc(file->size * sizeof(unsigned char*));
     if (content == NULL) {
-        _ERROR("Memory allocation failed for reading file %s.", file->name);
+        _ERROR("read_file: Memory allocation failed for reading file %s.", file->name);
         return NULL;
     }
 
-    for (size_t i = 0; i < file->size; i++) {
-        size_t block_id = i / DISK_BLOCK_SIZE;
-        size_t block_offset = i % DISK_BLOCK_SIZE;
-        content[i] = read_virtual_disk_at(file->blocks[block_id]->disk_id, file->blocks[block_id]->block_id * DISK_BLOCK_SIZE + block_offset);
+    size_t data_pos = 0;
+    for (size_t i = 0; i < file->block_count; i++) {
+        disk_block* block = file->blocks[i];
+        size_t read_bytes_len = ((length - data_pos) > DISK_BLOCK_SIZE) ? DISK_BLOCK_SIZE : length - data_pos;
+        _TRACE("read_file: trying to read data(%zu bytes) from block %zu on physical disk %zu", read_bytes_len, block->block_id, block->disk_id);
+        unsigned char* data = read_bytes_virtual_disk_at(block->mounted_virtual_disk_id, i * DISK_BLOCK_SIZE, read_bytes_len);
+        strcat(content, data);
     }
 
     return content;

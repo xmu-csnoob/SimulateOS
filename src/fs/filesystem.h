@@ -9,6 +9,7 @@
 
 #define MAX_FILES 1024
 #define MAX_FILE_NAME 256
+#define FS_MAX_VIRTUAL_DISKS 4
 
 typedef enum {
     FILE_TYPE,
@@ -28,11 +29,12 @@ typedef struct file_system_entity {
 
 typedef struct {
     file_system_entity *root;
-    virtual_disk *v_disks;
+    virtual_disk* v_disks[FS_MAX_VIRTUAL_DISKS];
+    size_t v_disk_count;
 } file_system;
 
 // 创建文件系统
-file_system* create_file_system(virtual_disk *v_disks);
+file_system* create_file_system(virtual_disk** v_disks);
 
 // 创建文件系统实体
 file_system_entity* create_entity(const char *name, file_type type, file_system_entity *parent);
@@ -47,7 +49,7 @@ file_system_entity* find_entity(file_system_entity *parent, const char *name);
 void print_filesystem(file_system *fs);
 
 // 文件读写
-int write_file(file_system_entity *file, const char *data, size_t length);
-char* read_file(file_system_entity *file, size_t *length);
+int write_file(file_system* fs, file_system_entity *file, const char *data, size_t length);
+unsigned char* read_file(file_system_entity *file);
 
 #endif // FILESYSTEM_H

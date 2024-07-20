@@ -9,7 +9,9 @@
 typedef struct {
     size_t block_id;
     size_t disk_id;
+    size_t mounted_virtual_disk_id;
     int mounted;
+    int occupied;
 } disk_block;
 
 typedef struct {
@@ -18,6 +20,7 @@ typedef struct {
 } disk_blocks;
 
 typedef struct {
+    size_t id;
     char* name;
     size_t block_count;
     size_t size;
@@ -34,7 +37,7 @@ void init_disk_blocks();
 void print_disk_blocks();
 
 // functions for virutal blocks
-int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id);
+int mount_disk_block(size_t v_disk_id, size_t disk_id, size_t block_id);
 virtual_disk* create_virtual_disk(const char* name);
 void free_virtual_disk(virtual_disk* v_disk);
 

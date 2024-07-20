@@ -4,7 +4,7 @@ disk_blocks* disk_blocks_table[MAX_DISKS];
 
 virtual_disk* virtual_disks[MAX_VIRTUAL_DISKS];
 
-int virtual_disk_count = -1;
+int virtual_disk_count = 0;
 
 void init_disk_blocks() {
     for (int i = 0; i < MAX_DISKS; i++) {
@@ -21,6 +21,8 @@ void init_disk_blocks() {
             t->blocks[j].disk_id = i;
             t->blocks[j].block_id = j;
             t->blocks[j].mounted = 0;
+            t->blocks[j].occupied = 0;
+            t->blocks[j].mounted_virtual_disk_id = -1;
         }
         disk_blocks_table[i] = t;
     }
@@ -31,10 +33,10 @@ void print_disk_blocks() {
     for (int i = 0; i < MAX_DISKS; i++) {
         disk_blocks *dbs = disk_blocks_table[i];
         size_t blocks = dbs->block_count;
-        _TRACE("Disk id: %d, has %zu blocks in total.\n", i, blocks);
+        _TRACE("Disk id: %d, has %zu blocks in total.", i, blocks);
         for (int j = 0; j < blocks; j++) {
             disk_block db = dbs->blocks[j];
-            _TRACE("Block id %d, %s\n", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
+            _TRACE("Block id %d, %s", j, db.mounted == 0 ? "has not been mounted." : "has been mounted.");
             if(db.mounted == 1){
                 mounted_size++;
                 _TEST("Block id %d is mounted to virtual disk %d", j, i);
@@ -44,7 +46,8 @@ void print_disk_blocks() {
     _TEST("%d disk_blocks has been mounted", mounted_size);
 }
 
-int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id) {
+int mount_disk_block(size_t v_disk_id, size_t disk_id, size_t block_id) {
+    virtual_disk* v_disk = virtual_disks[v_disk_id];
     disk_block db = disk_blocks_table[disk_id]->blocks[block_id];
     if (db.mounted == 1) {
         _ERROR("Error: trying to mount an already mounted block at disk %zu, block %zu\n", disk_id, block_id);
@@ -60,10 +63,11 @@ int mount_disk_block(virtual_disk* v_disk, size_t disk_id, size_t block_id) {
     }
     
     v_disk->mounted_blocks[v_disk->block_count] = db;
-    v_disk->block_count++;
     v_disk->size += DISK_BLOCK_SIZE;
     v_disk->mounted_blocks[v_disk->block_count].mounted = 1;
-    _TEST("mount disk %zu block %zu to virtual disk %zu", disk_id, block_id, virtual_disk_count);
+    v_disk->mounted_blocks[v_disk->block_count].mounted_virtual_disk_id = v_disk_id;
+    v_disk->block_count++;
+    _TEST("mount disk %zu block %zu to virtual disk %d", disk_id, block_id, virtual_disk_count);
     return 1;
 }
 
@@ -78,7 +82,8 @@ virtual_disk* create_virtual_disk(const char* name) {
     v_disk->block_count = 0;
     v_disk->size = 0;
     v_disk->mounted_blocks = NULL;
-    virtual_disks[++virtual_disk_count] = v_disk;
+    v_disk->id = virtual_disk_count;
+    virtual_disks[virtual_disk_count++] = v_disk;
     return v_disk;
 }
 
@@ -102,14 +107,23 @@ unsigned char read_virtual_disk_at(int virtual_disk_id, size_t address) {
 }
 
 int write_virtual_disk_at(int virtual_disk_id, size_t address, unsigned char byte) {
+    _TRACE("write_virtual_disk_at : trying to write %hx to virtual disk %d at address %zu", byte, virtual_disk_id, address);
     virtual_disk* disk = virtual_disks[virtual_disk_id];
+    if(virtual_disk_id < 0 || virtual_disk_id >= MAX_VIRTUAL_DISKS){
+        _ERROR("write_virtual_disk_at : virtual disk id %d is not a valid value.", virtual_disk_id);
+        return -1;
+    }
+    if(disk == NULL){
+        _ERROR("write_virtual_disk_at : can not find virtual disk %d.", virtual_disk_id);
+        return 0;
+    }
+    _TRACE("write_virtual_disk_at : find virtual disk %zu : %s, has %zu blocks", disk->id, disk->name, disk->block_count);
     int block_id = address / DISK_BLOCK_SIZE;
     int block_offset = address % DISK_BLOCK_SIZE;
     disk_block* db = &disk->mounted_blocks[block_id];
     size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
-    _DEBUG("disk_offset is %zu", disk_offset);
     write_at(physical_disks[db->disk_id].file, disk_offset, byte);
-    return 0;
+    return 1;
 }
 
 unsigned char* read_bytes_in_block(int virtual_disk_id, int block_id, size_t address, size_t length){
@@ -125,7 +139,8 @@ unsigned char* read_bytes_in_block(int virtual_disk_id, int block_id, size_t add
 }
 
 unsigned char* read_bytes_virtual_disk_at(int virtual_disk_id, size_t address, size_t length) {
-    unsigned char *data = (unsigned char *)malloc(length);
+    _TRACE("read_bytes_virtual_disk_at : trying to read %zu bytes on address %zu from virtual disk %s.", length, address, virtual_disks[virtual_disk_id]->name);
+    unsigned char *data = (unsigned char *)malloc(length * sizeof(unsigned char*));
     if (!data) {
         _ERROR("Memory allocation failed.");
         return NULL;
@@ -137,22 +152,18 @@ unsigned char* read_bytes_virtual_disk_at(int virtual_disk_id, size_t address, s
     while (bytes_read < length) {
         size_t block_id = (address + bytes_read) / DISK_BLOCK_SIZE;
         size_t block_offset = (address + bytes_read) % DISK_BLOCK_SIZE;
-        size_t bytes_to_read = DISK_BLOCK_SIZE - block_offset;
-        if (bytes_to_read > length - bytes_read) {
-            bytes_to_read = length - bytes_read;
-        }
-
+        size_t bytes_to_read = (length >= DISK_BLOCK_SIZE) ? DISK_BLOCK_SIZE - block_offset : length;
         disk_block* db = &disk->mounted_blocks[block_id];
         size_t disk_offset = db->block_id * DISK_BLOCK_SIZE + block_offset;
 
-        unsigned char buffer[bytes_to_read];
+        unsigned char* buffer = (unsigned char*)malloc(bytes_to_read * sizeof(unsigned char *));
         read_buffer_at(physical_disks[db->disk_id].file, disk_offset, buffer, bytes_to_read);
 
         memcpy(data + bytes_read, buffer, bytes_to_read);
 
         bytes_read += bytes_to_read;
     }
-
+    _TRACE("read_bytes_virtual_disk_at : success on reading %zu bytes on address %zu from virtual disk %s, data is %s", length, address, virtual_disks[virtual_disk_id]->name, data);
     return data;
 }
 

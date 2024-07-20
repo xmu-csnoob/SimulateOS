@@ -100,10 +100,11 @@ size_t get_byte_offset(FILE* file, size_t address) {
     size_t head = pos;
     pos += (address * BYTES_PER_VIRTUAL_BYTE + address / VIRTUAL_BYTES_PER_ROW); 
     fseek(file, 0, SEEK_SET);
-    return pos + address / VIRTUAL_BYTES_PER_ROW;
+    return pos;
 }
 
 void write_at(FILE* file, size_t address, unsigned char value) {
+    _TRACE("write_at : try to write %0x at address %zu", value, address);
     size_t pos = get_byte_offset(file, address);
     fseek(file, pos, SEEK_SET);
     char hex_value[3];
@@ -120,15 +121,20 @@ void write_buffer_at(FILE* file, size_t address, const unsigned char* buffer, si
 }
 
 unsigned char read_at(FILE* file, size_t address) {
+    _TRACE("read_at : try to read byte at address %zu from physical disk", address);
     size_t pos = get_byte_offset(file, address);
     fseek(file, pos, SEEK_SET);
     char hex_byte[3] = {0};
     fread(hex_byte, 1, 2, file);
-    return (unsigned char)strtol(hex_byte, NULL, 16);
+    unsigned char c = (unsigned char)strtol(hex_byte, NULL, 16);
+    _TRACE("read_at : success to read byte at address %zu from physical disk, data is %c", address, c);
+    return c;
 }
 
 void read_buffer_at(FILE* file, size_t address, unsigned char* buffer, size_t bufferSize) {
+    _TRACE("read_buffer_at : try to read %zu bytes at address %zu from physical disk", bufferSize, address);
     for (size_t i = 0; i < bufferSize; i++) {
         buffer[i] = read_at(file, address + i);
     }
+    _TRACE("read_buffer_at : success to read %zu bytes at address %zu from physical disk, data is %s", bufferSize, address, buffer);
 }

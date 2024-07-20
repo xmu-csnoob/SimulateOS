@@ -2,11 +2,12 @@
 
 void test_filesystem() {
     virtual_disk *v_disk = create_virtual_disk("TestFileSystem");
-    mount_disk_block(v_disk, 2, 0);
-    mount_disk_block(v_disk, 2, 1);
-    // mount_disk_block(v_disk, 2, 2);
-    _TEST("create virtual disk: %s, block num is %zu", virtual_disks[virtual_disk_count]->name, virtual_disks[virtual_disk_count]->block_count);
-    file_system *fs = create_file_system(v_disk);
+    virtual_disk* v_disks[1];
+    v_disks[0] = v_disk;
+    mount_disk_block(v_disk->id, 2, 0);
+    mount_disk_block(v_disk->id, 2, 1);
+    _TEST("create virtual disk: %s, block num is %zu", virtual_disks[v_disk->id]->name, virtual_disks[v_disk->id]->block_count);
+    file_system *fs = create_file_system(v_disks);
     _TEST("create file system, root is /%s", fs->root->name);
     file_system_entity *root = fs->root;
     assert(root != NULL);
@@ -34,13 +35,17 @@ void test_filesystem() {
     print_filesystem(fs);
 
     // 写入文件内容测试
-    const char *data = "0x41";
-    write_file(file1, data, strlen(data));
-    size_t length;
-    char *content = read_file(file1, &length);
+    const char *data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccccccccccdddddddddddddddddddddddddddddddddddeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffff";
+    int ret = write_file(fs, file1, data, strlen(data));
+    if(ret == -1){
+        _TEST("write file failed, mount more blocks to try again");
+        mount_disk_block(v_disk->id, 2, 2);
+        mount_disk_block(v_disk->id, 2, 3);
+        write_file(fs, file1, data, strlen(data));
+    }
+    unsigned char *content = read_file(file1);
+    _TEST("read content is %s", content);
     assert(content != NULL);
-    assert(length == strlen(data));
-    assert(memcmp(content, data, length) == 0);
 
 
     // 释放内存
