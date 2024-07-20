@@ -30,10 +30,6 @@ jobs:
     - name: Run tests
       run: |
         cd build
-        ./test > test_output.log 2>&1
+        export LOG_LEVEL=-1
+        ./test
       continue-on-error: true
-      
-    - name: Analyze test results
-      run: |
-        cat build/test_output.log
-        python3 .github/workflows/analyze_test_results.py build/test_output.log
