@@ -16,18 +16,16 @@ jobs:
       
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y cmake make gcc
-      
-    - name: Create build directory
-      run: mkdir -p build
-      
-    - name: Configure with CMake
-      run: cd build && cmake ..
-      
-    - name: Build project
-      run: cd build && make
+
+    - name: Make commands.sh executable
+      run: chmod +x devtool/commands.sh
+
+    - name: Build kernel
+      run: devtool/commands.sh mkk
+
+    - name: Build tests
+      run: devtool/commands.sh mkt
       
     - name: Run tests
       run: |
-        cd build
-        export LOG_LEVEL=-1
         ./test
