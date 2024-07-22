@@ -24,7 +24,7 @@ provide a simple file system
 
 provide virtual disks and io operations.
 
-## Compile and Run
+## Compile and Run（General Method）
 
 ### 1. create /build directory
 
@@ -50,7 +50,42 @@ make
 
 ### 4. run
 ```bash
+cd ..
 # run kernel
 ./kernel
 # run testcases
 ./test
+```
+
+## Compile and Run（Recommended method）
+
+### 1. (option 1, recommended) add this line to ~/.bashrc（Ubuntu）
+```bash
+source ~/your_work_path/SimulateOS/devtool/commands.sh
+```
+
+### 2. (option 2, only effective in current terminal) use the command in terminal
+
+```bash
+source ~/your_work_path/SimulateOS/devtool/commands.sh
+```
+
+### 3. 
+```bash
+cd SimulateOS
+# mkk to build kernel
+mkk
+./kernel
+
+# mkt to build test
+mkt
+./test
+
+# mk to build both
+mk
+./kernel
+./test
+
+# mc to clear built executables
+mc
+```
