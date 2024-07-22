@@ -22,10 +22,20 @@ function mk() {
     mkt
 }
 
-function mc(){
-    rm kernel
-    rm test
+function mc() {
+    if [ -f "kernel" ]; then
+        rm kernel
+    fi
+
+    if [ -f "test" ]; then
+        rm test
+    fi
+
+    if [ -d "build" ]; then
+        rm -r build
+    fi
 }
+
 
 function setenv() {
     export $1=$2

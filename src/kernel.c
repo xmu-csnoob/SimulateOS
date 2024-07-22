@@ -17,20 +17,16 @@ void init_system();
 file_system_entity* current_dir;
 
 int main() {
-    // 初始化日志级别
     init_log_level();
     
-    // 初始化系统
     init_system();
 
-    // 启动shell
     char command[256];
     printf("Welcome to the SimulateOS Shell\n");
     current_dir = system_file_system->root;
     while (1) {
         printf("SimulateOS > : %s# ", get_entity_absolute_path(current_dir));
         if (fgets(command, sizeof(command), stdin) != NULL) {
-            // 移除换行符
             command[strcspn(command, "\n")] = '\0';
             handle_shell_command(command);
         }
@@ -39,12 +35,10 @@ int main() {
 }
 
 void init_system() {
-    // 初始化各个模块
     init_memory();
     init_blocks();
     init_pages();
 
-    // 注册磁盘
     const char* disks[MAX_DISKS] = {
         "src/hardwares/disks/disk0.disk",
         "src/hardwares/disks/disk1.disk",
@@ -55,7 +49,6 @@ void init_system() {
         register_disk(disks[i]);
     }
     init_disk_blocks();
-    // 创建文件系统
     virtual_disk *v_disk = create_virtual_disk("RootDisk");
     virtual_disk* v_disks[1];
     v_disks[0] = v_disk;
