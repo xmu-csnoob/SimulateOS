@@ -17,18 +17,20 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y cmake make gcc
 
-    - name: Compile && Make Kernel
+    - name: Compile and Make Kernel
       run: |
         mkdir -p build
         cd build
         cmake ..
         make kernel
 
-    - name: Compile && Make test
+    - name: Compile and Make Test
       run: |
+        cd build
+        cmake ..
         make test
 
     - name: Run Tests
       run: |
-        cd ..
+        export LOG_LEVEL=-1
         ./test
