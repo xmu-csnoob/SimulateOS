@@ -46,10 +46,10 @@ void init_system() {
 
     // 注册磁盘
     const char* disks[MAX_DISKS] = {
-        "../src/hardwares/disks/disk0.disk",
-        "../src/hardwares/disks/disk1.disk",
-        "../src/hardwares/disks/disk2.disk",
-        "../src/hardwares/disks/disk3.disk"
+        "src/hardwares/disks/disk0.disk",
+        "src/hardwares/disks/disk1.disk",
+        "src/hardwares/disks/disk2.disk",
+        "src/hardwares/disks/disk3.disk"
     };
     for (int i = 0; i < MAX_DISKS; i++) {
         register_disk(disks[i]);

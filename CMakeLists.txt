@@ -42,6 +42,9 @@ file(GLOB TEST_SOURCES
     "${CMAKE_SOURCE_DIR}/src/common/*.c"
 )
 
+# 设置可执行文件输出目录
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+
 # 添加可执行文件
 add_executable(kernel ${KERNEL_SOURCES})
 add_executable(test ${TEST_SOURCES})

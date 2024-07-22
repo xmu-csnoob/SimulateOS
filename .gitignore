@@ -1,8 +1,7 @@
 # 排除所有文件和目录
-/*
-
+/.vscode
+/build
+kernel
+test
+/src/hardwares/disks/*
 # 例外规则：只包括 src 目录和 CMakeLists.txt 文件
-!src/
-!testing/
-!CMakeLists.txt
-!.github/workflows
