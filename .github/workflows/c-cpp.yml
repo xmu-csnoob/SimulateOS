@@ -17,15 +17,19 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y cmake make gcc
 
-    - name: Make commands.sh executable
-      run: chmod +x devtool/commands.sh
-
-    - name: Build kernel
-      run: devtool/commands.sh mkk
-
-    - name: Build tests
-      run: devtool/commands.sh mkt
-      
-    - name: Run tests
+    - name: Compile && Make Kernel
       run: |
+        cd build
+        cmake ..
+        make kernel
+
+    - name: Compile && Make test
+      run: |
+        cd build
+        cmake ..
+        make test
+
+    - name: Run Tests
+      run: |
+        cd ..
         ./test
