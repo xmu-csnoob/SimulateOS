@@ -134,10 +134,10 @@ void create_disk_file(const char *filename, const char *disk_name, size_t disk_s
 }
 
 void generate_disks(){
-    create_disk_file("../src/hardwares/disks/disk0.disk", "Samsung 990 pro", 256);
-    create_disk_file("../src/hardwares/disks/disk1.disk", "Samsung 990 pro", 512);
-    create_disk_file("../src/hardwares/disks/disk2.disk", "Samsung 990 pro", 1024);
-    create_disk_file("../src/hardwares/disks/disk3.disk", "Samsung 990 pro", 2048);
+    create_disk_file("src/hardwares/disks/disk0.disk", "Samsung 990 pro", 256);
+    create_disk_file("src/hardwares/disks/disk1.disk", "Samsung 990 pro", 512);
+    create_disk_file("src/hardwares/disks/disk2.disk", "Samsung 990 pro", 1024);
+    create_disk_file("src/hardwares/disks/disk3.disk", "Samsung 990 pro", 2048);
 }
 
 void test_disks() {
