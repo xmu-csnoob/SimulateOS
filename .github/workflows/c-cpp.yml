@@ -19,6 +19,7 @@ jobs:
 
     - name: Compile && Make Kernel
       run: |
+        mkdir -p build
         cd build
         cmake ..
         make kernel
