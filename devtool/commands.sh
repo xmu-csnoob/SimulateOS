@@ -14,7 +14,6 @@ function mkt() {
     cmake ..
     make test
     cd ..
-    echo "over"
 }
 
 function mk() {
@@ -39,4 +38,8 @@ function mc() {
 
 function setenv() {
     export $1=$2
+}
+
+function lg(){
+    export LOG_LEVEL=$1
 }
